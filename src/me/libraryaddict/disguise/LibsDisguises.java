@@ -424,6 +424,8 @@ public class LibsDisguises extends JavaPlugin {
                     continue;
                 }
 
+                disguiseType.setTypeId(ReflectionManager.getEntityType(nmsEntity));
+
                 Entity bukkitEntity = ReflectionManager.getBukkitEntity(nmsEntity);
                 int entitySize = 0;
 
@@ -447,36 +449,34 @@ public class LibsDisguises extends JavaPlugin {
                     MetaIndex flagType = MetaIndex.getFlag(watcherClass, watch.getIndex());
 
                     if (flagType == null) {
-                        System.err.println("Error finding the FlagType for " + disguiseType.name() + "! Index " +
-                                watch.getIndex() + " can't be found!");
-                        System.err.println(
-                                "Value is " + watch.getRawValue() + " (" + watch.getRawValue().getClass() + ") (" +
-                                        nmsEntity.getClass() + ") & " + watcherClass.getSimpleName());
-                        System.err.println("Lib's Disguises will continue to load, but this will not work properly!");
+                        System.err.println("[LibsDisguises] MetaIndex not found for " + disguiseType + "! Index: " +
+                                watch.getIndex());
+                        System.err.println("[LibsDisguises] Value: " + watch.getRawValue() + " (" +
+                                watch.getRawValue().getClass() + ") (" + nmsEntity.getClass() + ") & " +
+                                watcherClass.getSimpleName());
                         continue;
                     }
 
                     indexes.remove(flagType);
 
-                    Object obj1 = ReflectionManager.convertInvalidItem(flagType.getDefault());
-                    Object obj2 = ReflectionManager.convertInvalidItem(watch.getValue());
+                    Object ourValue = ReflectionManager.convertInvalidMeta(flagType.getDefault());
+                    Object nmsValue = ReflectionManager.convertInvalidMeta(watch.getValue());
 
-                    if (obj1 != obj2 && ((obj1 == null || obj2 == null) || obj1.getClass() != obj2.getClass())) {
-                        System.err.println("Mismatch of " + "FlagType's for " + disguiseType.name() + "! Index " +
-                                watch.getIndex() + " has the wrong classtype!");
-                        System.err.println("MetaIndex has the " + "default of " + flagType.getDefault() + " (" +
+                    if (ourValue != nmsValue &&
+                            ((ourValue == null || nmsValue == null) || ourValue.getClass() != nmsValue.getClass())) {
+                        System.err.println("[LibsDisguises] MetaIndex mismatch for " + disguiseType + "! Index: " +
+                                watch.getIndex());
+                        System.err.println("[LibsDisguises] MetaIndex: " + flagType.getDefault() + " (" +
                                 flagType.getDefault().getClass() + ") (" + nmsEntity.getClass() + ") & " +
                                 watcherClass.getSimpleName());
-                        System.err.println("Where the internals is " + watch.getRawValue() + " (" +
-                                watch.getRawValue().getClass());
-                        System.err.println("Lib's Disguises will continue to load, but this will not work properly!");
+                        System.err.println("[LibsDisguises] Minecraft: " + watch.getRawValue() + " (" +
+                                watch.getRawValue().getClass() + ")");
                     }
                 }
 
                 for (MetaIndex index : indexes) {
-                    System.out.println(
-                            disguiseType + " has MetaIndex remaining! " + index.getFlagWatcher().getSimpleName() +
-                                    " at index " + index.getIndex());
+                    System.out.println("[LibsDisguises] " + disguiseType + " has MetaIndex remaining! " +
+                            index.getFlagWatcher().getSimpleName() + " at index " + index.getIndex());
                 }
 
                 DisguiseSound sound = DisguiseSound.getType(disguiseType.name());
