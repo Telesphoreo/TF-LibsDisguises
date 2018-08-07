@@ -12,6 +12,7 @@ import me.libraryaddict.disguise.utilities.LibsMsg;
 import me.libraryaddict.disguise.utilities.ReflectionFlagWatchers;
 import me.libraryaddict.disguise.utilities.ReflectionFlagWatchers.ParamInfo;
 import me.totalfreedom.libsdisguise.DisallowedDisguises;
+import me.totalfreedom.libsdisguise.TF_DisguiseAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -78,9 +79,8 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
                 disguise.setViewSelfDisguise(!disguise.isSelfDisguiseVisible());
         }
 
-        if (!DisallowedDisguises.disabled)
+        if (!TF_DisguiseAPI.disabled)
         {
-
             if (DisallowedDisguises.isAllowed(disguise))
             {
 

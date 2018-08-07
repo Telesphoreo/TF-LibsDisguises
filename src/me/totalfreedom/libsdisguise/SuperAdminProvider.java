@@ -1,11 +1,12 @@
 package me.totalfreedom.libsdisguise;
 
 import com.google.common.base.Function;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import java.util.logging.Logger;
 
 public class SuperAdminProvider
 {
@@ -56,7 +57,7 @@ public class SuperAdminProvider
                 return false;
             }
 
-            superAdminProvider = (Function<Player, Boolean>)provider;
+            superAdminProvider = (Function<Player, Boolean>) provider;
         }
 
         return superAdminProvider.apply(player);

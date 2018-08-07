@@ -1,13 +1,16 @@
 package me.totalfreedom.libsdisguise;
 
-public class TF_DisguiseAPI {
+public class TF_DisguiseAPI
+{
+    public static boolean disabled = false;
+
     public static void disableDisguises()
     {
-        DisallowedDisguises.disabled = true;
+        disabled = true;
     }
 
     public static void enableDisguises()
     {
-        DisallowedDisguises.disabled = false;
+        disabled = false;
     }
 }
