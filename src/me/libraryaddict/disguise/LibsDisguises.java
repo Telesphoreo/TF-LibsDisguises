@@ -349,7 +349,7 @@ public class LibsDisguises extends JavaPlugin {
             }
 
             if (watcherClass == null) {
-                System.err.println("Error loading " + disguiseType.name() + ", FlagWatcher not assigned");
+                getLogger().severe("Error loading " + disguiseType.name() + ", FlagWatcher not assigned");
                 continue;
             }
 
@@ -491,11 +491,9 @@ public class LibsDisguises extends JavaPlugin {
                     MetaIndex flagType = MetaIndex.getFlag(watcherClass, watch.getIndex());
 
                     if (flagType == null) {
-                        System.err.println("[LibsDisguises] MetaIndex not found for " + disguiseType + "! Index: " +
-                                watch.getIndex());
-                        System.err.println("[LibsDisguises] Value: " + watch.getRawValue() + " (" +
-                                watch.getRawValue().getClass() + ") (" + nmsEntity.getClass() + ") & " +
-                                watcherClass.getSimpleName());
+                        getLogger().severe("MetaIndex not found for " + disguiseType + "! Index: " + watch.getIndex());
+                        getLogger().severe("Value: " + watch.getRawValue() + " (" + watch.getRawValue().getClass() +
+                                ") (" + nmsEntity.getClass() + ") & " + watcherClass.getSimpleName());
                         continue;
                     }
 
@@ -506,19 +504,19 @@ public class LibsDisguises extends JavaPlugin {
 
                     if (ourValue != nmsValue &&
                             ((ourValue == null || nmsValue == null) || ourValue.getClass() != nmsValue.getClass())) {
-                        System.err.println("[LibsDisguises] MetaIndex mismatch for " + disguiseType + "! Index: " +
-                                watch.getIndex());
-                        System.err.println("[LibsDisguises] MetaIndex: " + flagType.getDefault() + " (" +
+                        getLogger().severe("[MetaIndex mismatch for " + disguiseType + "! Index: " + watch.getIndex());
+                        getLogger().severe("MetaIndex: " + flagType.getDefault() + " (" +
                                 flagType.getDefault().getClass() + ") (" + nmsEntity.getClass() + ") & " +
                                 watcherClass.getSimpleName());
-                        System.err.println("[LibsDisguises] Minecraft: " + watch.getRawValue() + " (" +
-                                watch.getRawValue().getClass() + ")");
+                        getLogger().severe("Minecraft: " + watch.getRawValue() + " (" + watch.getRawValue().getClass() +
+                                ")");
                     }
                 }
 
                 for (MetaIndex index : indexes) {
-                    System.out.println("[LibsDisguises] " + disguiseType + " has MetaIndex remaining! " +
-                            index.getFlagWatcher().getSimpleName() + " at index " + index.getIndex());
+                    getLogger().warning(
+                            disguiseType + " has MetaIndex remaining! " + index.getFlagWatcher().getSimpleName() +
+                                    " at index " + index.getIndex());
                 }
 
                 DisguiseSound sound = DisguiseSound.getType(disguiseType.name());
@@ -547,13 +545,12 @@ public class LibsDisguises extends JavaPlugin {
                 disguiseValues.setEntitySize(ReflectionManager.getSize(bukkitEntity));
             }
             catch (SecurityException | IllegalArgumentException | IllegalAccessException | FieldAccessException ex) {
-                System.out.print("[LibsDisguises] Uh oh! Trouble while making values for the disguise " +
-                        disguiseType.name() + "!");
-                System.out.print("[LibsDisguises] Before reporting this error, " +
+                getLogger().severe("Uh oh! Trouble while making values for the disguise " + disguiseType.name() + "!");
+                getLogger().severe("Before reporting this error, " +
                         "please make sure you are using the latest version of LibsDisguises and ProtocolLib.");
-                System.out.print("[LibsDisguises] Development builds are available at (ProtocolLib) " +
-                        "http://ci.dmulloy2.net/job/ProtocolLib/ and (LibsDisguises) http://server.o2gaming" +
-                        ".com:8080/job/LibsDisguises%201.9+/");
+                getLogger().severe("Development builds are available at (ProtocolLib) " +
+                        "http://ci.dmulloy2.net/job/ProtocolLib/ and (LibsDisguises) https://ci.md-5" +
+                        ".net/job/LibsDisguises/");
 
                 ex.printStackTrace();
             }
