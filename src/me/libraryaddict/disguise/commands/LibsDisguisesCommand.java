@@ -1,17 +1,14 @@
 package me.libraryaddict.disguise.commands;
 
-import me.libraryaddict.disguise.LibsDisguises;
+import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.utilities.LibsMsg;
 import me.libraryaddict.disguise.utilities.LibsPremium;
-import me.libraryaddict.disguise.utilities.TranslateType;
-import me.totalfreedom.libsdisguise.SuperAdminProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,13 +52,12 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(
-                    ChatColor.DARK_GREEN + "This server is running " + "Lib's Disguises v" + Bukkit.getPluginManager()
-                            .getPlugin("LibsDisguises").getDescription()
-                            .getVersion() + " by libraryaddict, formerly maintained " + "by Byteflux and NavidK0." + (
-                            sender.hasPermission("libsdisguises.reload") ?
-                                    "\nUse " + ChatColor.GREEN + "/libsdisguises " + "reload" + ChatColor.DARK_GREEN + " to reload the config. All disguises will be blown by doing this" + "." :
-                                    ""));
+            sender.sendMessage(ChatColor.DARK_GREEN + "This server is running " + "Lib's Disguises v" +
+                    Bukkit.getPluginManager().getPlugin("LibsDisguises").getDescription().getVersion() +
+                    " by libraryaddict, formerly maintained " + "by Byteflux and NavidK0." +
+                    (sender.hasPermission("libsdisguises.reload") ?
+                            "\nUse " + ChatColor.GREEN + "/libsdisguises " + "reload" + ChatColor.DARK_GREEN +
+                                    " to reload the config. All disguises will be blown by doing this" + "." : ""));
 
             if (LibsPremium.isPremium()) {
                 sender.sendMessage(ChatColor.DARK_GREEN + "This server supports the plugin developer!");
@@ -70,7 +66,7 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
             Player sender_p = Bukkit.getPlayer(sender.getName());
             if (SuperAdminProvider.isSuperAdmin(sender_p)) {
                 if (args[0].equalsIgnoreCase("reload")) {
-                    LibsDisguises.getInstance().reload();
+                    DisguiseConfig.loadConfig();
                     sender.sendMessage(LibsMsg.RELOADED_CONFIG.get());
                     return true;
                 } else {
