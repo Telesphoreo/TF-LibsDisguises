@@ -1,42 +1,26 @@
-package me.libraryaddict.disguise.utilities;
+package me.libraryaddict.disguise.utilities.parser;
 
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.*;
-import org.bukkit.*;
-import org.bukkit.block.BlockFace;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.LibsMsg;
+import me.libraryaddict.disguise.utilities.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.EulerAngle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DisguiseParser {
-    public static class DisguiseParseException extends Exception {
-        private static final long serialVersionUID = 1276971370793124510L;
-
-        public DisguiseParseException() {
-            super();
-        }
-
-        public DisguiseParseException(LibsMsg message, String... params) {
-            super(message.get((Object[]) params));
-        }
-    }
-
     public static class DisguisePerm {
         private DisguiseType disguiseType;
         private String permName;
@@ -115,18 +99,6 @@ public class DisguiseParser {
         }
     }
 
-    private static Object callValueOf(Class<?> param, String valueString,
-            String methodName) throws DisguiseParseException {
-        Object value;
-        try {
-            value = param.getMethod("valueOf", String.class).invoke(null, valueString.toUpperCase());
-        }
-        catch (Exception ex) {
-            throw parseToException(param, valueString, methodName);
-        }
-        return value;
-    }
-
     private static void doCheck(CommandSender sender, HashMap<ArrayList<String>, Boolean> optionPermissions,
             ArrayList<String> usedOptions) throws DisguiseParseException {
 
@@ -198,18 +170,6 @@ public class DisguiseParser {
         }
 
         return perms;
-    }
-
-    private static Entry<Method, Integer> getMethod(Method[] methods, String methodName, int toStart) {
-        for (int i = toStart; i < methods.length; i++) {
-            Method method = methods[i];
-
-            if (!method.getName().equalsIgnoreCase(methodName))
-                continue;
-
-            return new HashMap.SimpleEntry(method, ++i);
-        }
-        return null;
     }
 
     private static HashMap<ArrayList<String>, Boolean> getOptions(String perm) {
@@ -678,385 +638,75 @@ public class DisguiseParser {
             HashMap<ArrayList<String>, Boolean> optionPermissions, ArrayList<String> usedOptions,
             String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
             DisguiseParseException {
-        Method[] methods = ReflectionFlagWatchers.getDisguiseWatcherMethods(disguise.getWatcher().getClass());
+        Method[] methods = ParamInfoManager.getDisguiseWatcherMethods(disguise.getWatcher().getClass());
+        List<String> list = new ArrayList<>(Arrays.asList(args));
 
-        for (int i = 0; i < args.length; i += 2) {
-            String methodNameRaw;
-            String methodName = TranslateType.DISGUISE_OPTIONS.reverseGet(methodNameRaw = args[i]);
-            String valueString = TranslateType.DISGUISE_OPTIONS_PARAMETERS
-                    .reverseGet(args.length - 1 == i ? null : args[i + 1]);
+        for (int argIndex = 0; argIndex < args.length; argIndex++) {
+            // This is the method name they provided
+            String methodNameProvided = list.remove(0);
+            // Translate the name they provided, to a name we recognize
+            String methodNameJava = TranslateType.DISGUISE_OPTIONS.reverseGet(methodNameProvided);
+            // The method we'll use
             Method methodToUse = null;
-            Object value = null;
-            DisguiseParseException storedEx = null;
-            int c = 0;
+            Object valueToSet = null;
+            DisguiseParseException parseException = null;
 
-            while (c < methods.length) {
+            for (Method method : methods) {
+                if (!method.getName().equalsIgnoreCase(methodNameJava)) {
+                    continue;
+                }
+
+                Class paramType = method.getParameterTypes()[0];
+
+                ParamInfo paramInfo = ParamInfoManager.getParamInfo(paramType);
+
                 try {
-                    Entry<Method, Integer> entry = getMethod(methods, methodName, c);
+                    // Store how many args there were before calling the param
+                    int argCount = list.size();
 
-                    if (entry == null) {
-                        break;
+                    if (argCount < paramInfo.getMinArguments()) {
+                        throw new DisguiseParseException(LibsMsg.PARSE_NO_OPTION_VALUE,
+                                TranslateType.DISGUISE_OPTIONS.reverseGet(method.getName()));
                     }
 
-                    methodToUse = entry.getKey();
-                    c = entry.getValue();
-                    methodName = TranslateType.DISGUISE_OPTIONS.reverseGet(methodNameRaw = methodToUse.getName());
-                    Class<?>[] types = methodToUse.getParameterTypes();
-                    Class param = types[0];
+                    valueToSet = paramInfo.fromString(list);
 
-                    if (valueString != null) {
-                        if (int.class == param) {
-                            // Parse to integer
-                            if (isInteger(valueString)) {
-                                value = Integer.parseInt(valueString);
-                            } else {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (WrappedGameProfile.class == param && valueString.length() > 20) {
-                            try {
-                                value = DisguiseUtilities.getGson().fromJson(valueString, WrappedGameProfile.class);
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(WrappedGameProfile.class, valueString, methodName);
-                            }
-                        } else if (float.class == param || double.class == param) {
-                            // Parse to number
-                            if (isDouble(valueString)) {
-                                float obj = Float.parseFloat(valueString);
-                                if (param == float.class) {
-                                    value = obj;
-                                } else if (param == double.class) {
-                                    value = (double) obj;
-                                }
-                            } else {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == String.class) {
-                            if (methodNameRaw.equalsIgnoreCase("setskin") && valueString.length() > 20) {
-                                value = valueString;
-                            } else {
-                                // Parse to string
-                                value = ChatColor.translateAlternateColorCodes('&', valueString);
-                            }
-                        } else if (param == EulerAngle.class) {
-                            String[] split = valueString.split(",");
-
-                            if (split.length != 3)
-                                throw parseToException(param, valueString, methodName);
-
-                            if (!isDouble(split[0]) || !isDouble(split[1]) || !isDouble(split[2]))
-                                throw parseToException(param, valueString, methodName);
-
-                            value = new EulerAngle(Double.parseDouble(split[0]), Double.parseDouble(split[1]),
-                                    Double.parseDouble(split[2]));
-                        } else if (param == Villager.Profession.class) {
-                            try {
-                                value = Villager.Profession.valueOf(valueString.toUpperCase());
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == AnimalColor.class) {
-                            // Parse to animal color
-                            try {
-                                value = AnimalColor.valueOf(valueString.toUpperCase());
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param.getName().equals("org.bukkit.entity.Llama$Color")) {
-                            try {
-                                value = Llama.Color.valueOf(valueString.toUpperCase());
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == TropicalFish.Pattern.class) {
-                            try {
-                                value = TropicalFish.Pattern.valueOf(valueString.toUpperCase());
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == DyeColor.class) {
-                            try {
-                                value = DyeColor.valueOf(valueString.toUpperCase());
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == ItemStack.class) {
-                            // Parse to itemstack
-                            value = parseToItemstack(param, methodName, valueString);
-                        } else if (param == ItemStack[].class) {
-                            // Parse to itemstack array
-                            ItemStack[] items = new ItemStack[4];
-
-                            String[] split = valueString.split(",", -1);
-
-                            if (split.length == 4) {
-                                for (int a = 0; a < 4; a++) {
-                                    try {
-                                        items[a] = parseToItemstack(param, methodName, split[a]);
-                                    }
-                                    catch (Exception ex) {
-                                        throw parseToException(param, valueString, methodName);
-                                    }
-                                }
-                            } else {
-                                throw parseToException(param, valueString, methodName);
-                            }
-
-                            value = items;
-                        } else if (param == Horse.Color.class) {
-                            // Parse to horse color
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == Horse.Style.class) {
-                            // Parse to horse style
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == Art.class) {
-                            // Parse to art type
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == Ocelot.Type.class) {
-                            // Parse to ocelot type
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == Color.class) {
-                            Class cl = Class.forName("org.bukkit.Color");
-
-                            try {
-                                value = cl.getField(valueString.toUpperCase()).get(null);
-                            }
-                            catch (Exception ex) {
-                                try {
-                                    String[] split = valueString.split(",");
-
-                                    if (split.length == 1) {
-                                        value = Color.fromRGB(Integer.parseInt(split[0]));
-                                    } else if (split.length == 3) {
-                                        value = Color.fromRGB(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
-                                                Integer.parseInt(split[2]));
-                                    } else {
-                                        throw new Exception();
-                                    }
-                                }
-                                catch (Exception ex2) {
-                                    throw parseToException(param, valueString, methodName);
-                                }
-                            }
-                        } else if (param.getSimpleName().equals("TreeSpecies")) {
-                            // Parse to tree species
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == PotionEffectType.class) {
-                            // Parse to potion effect
-                            try {
-                                PotionEffectType potionType = PotionEffectType.getByName(valueString.toUpperCase());
-
-                                if (potionType == null && isInteger(valueString)) {
-                                    potionType = PotionEffectType.getById(Integer.parseInt(valueString));
-                                }
-
-                                if (potionType == null) {
-                                    throw new DisguiseParseException();
-                                }
-
-                                value = potionType;
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == int[].class) {
-                            String[] split = valueString.split(",");
-
-                            int[] values = new int[split.length];
-
-                            for (int b = 0; b < values.length; b++) {
-                                try {
-                                    values[b] = Integer.parseInt(split[b]);
-                                }
-                                catch (NumberFormatException ex) {
-                                    throw parseToException(param, valueString, methodName);
-                                }
-                            }
-
-                            value = values;
-                        } else if (param == BlockFace.class) {
-                            try {
-                                BlockFace face = BlockFace.valueOf(valueString.toUpperCase());
-
-                                if (face.ordinal() > 5) {
-                                    throw new DisguiseParseException();
-                                }
-
-                                value = face;
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == RabbitType.class) {
-                            try {
-                                for (RabbitType type : RabbitType.values()) {
-                                    if (type.name().replace("_", "")
-                                            .equalsIgnoreCase(valueString.replace("_", "").replace(" ", ""))) {
-                                        value = type;
-
-                                        break;
-                                    }
-                                }
-
-                                if (value == null) {
-                                    throw new Exception();
-                                }
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == BlockPosition.class) {
-                            try {
-                                String[] split = valueString.split(",");
-
-                                if (split.length != 3) {
-                                    throw new Exception();
-                                }
-
-                                value = new BlockPosition(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
-                                        Integer.parseInt(split[2]));
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        } else if (param == Parrot.Variant.class) {
-                            value = callValueOf(param, valueString, methodName);
-                        } else if (param == Particle.class) {
-                            try {
-                                for (Particle type : Particle.values()) {
-                                    if (type.name().replace("_", "")
-                                            .equalsIgnoreCase(valueString.replace("_", "").replace(" ", ""))) {
-                                        value = type;
-
-                                        break;
-                                    }
-                                }
-
-                                if (value == null) {
-                                    throw new Exception();
-                                }
-                            }
-                            catch (Exception ex) {
-                                throw parseToException(param, valueString, methodName);
-                            }
-                        }
+                    if (valueToSet == null && !paramInfo.canReturnNull()) {
+                        throw new IllegalStateException();
                     }
 
-                    if (value == null && boolean.class == param) {
-                        if (valueString == null) {
-                            value = true;
-                            i--;
-                        } else if (valueString
-                                .equalsIgnoreCase(TranslateType.DISGUISE_OPTIONS_PARAMETERS.get("true"))) {
-                            value = true;
-                        } else if (valueString
-                                .equalsIgnoreCase(TranslateType.DISGUISE_OPTIONS_PARAMETERS.get("false"))) {
-                            value = false;
-                        } else {
-                            if (getMethod(methods, valueString, 0) == null) {
-                                throw parseToException(param, valueString, methodName);
-                            } else {
-                                value = true;
-                                i--;
-                            }
-                        }
-                    }
+                    // Skip ahead as many args as were consumed on successful parse
+                    argIndex += argCount - list.size();
 
-                    if (value != null) {
-                        break;
-                    }
+                    methodToUse = method;
+                    // We've found a method which will accept a valid value, break
+                    break;
                 }
-                catch (DisguiseParseException ex) {
-                    storedEx = ex;
-                    methodToUse = null;
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                    methodToUse = null;
+                catch (Exception ignored) {
+                    parseException = new DisguiseParseException(LibsMsg.PARSE_EXPECTED_RECEIVED,
+                            paramInfo.getDescriptiveName(), list.isEmpty() ? null : list.get(0),
+                            TranslateType.DISGUISE_OPTIONS.reverseGet(method.getName()));
                 }
             }
 
             if (methodToUse == null) {
-                if (storedEx != null) {
-                    throw storedEx;
+                if (parseException != null) {
+                    throw parseException;
                 }
 
-                throw new DisguiseParseException(LibsMsg.PARSE_OPTION_NA, methodName);
-            }
-            if (value == null) {
-                throw new DisguiseParseException(LibsMsg.PARSE_NO_OPTION_VALUE, methodName);
+                throw new DisguiseParseException(LibsMsg.PARSE_OPTION_NA, methodNameProvided);
             }
 
-            if (!usedOptions.contains(methodNameRaw.toLowerCase())) {
-                usedOptions.add(methodNameRaw.toLowerCase());
+            if (!usedOptions.contains(methodToUse.getName().toLowerCase())) {
+                usedOptions.add(methodToUse.getName().toLowerCase());
             }
 
             doCheck(sender, optionPermissions, usedOptions);
 
             if (FlagWatcher.class.isAssignableFrom(methodToUse.getDeclaringClass())) {
-                methodToUse.invoke(disguise.getWatcher(), value);
+                methodToUse.invoke(disguise.getWatcher(), valueToSet);
             } else {
-                methodToUse.invoke(disguise, value);
-            }
-        }
-    }
-
-    private static DisguiseParseException parseToException(Class paramType, String receivedInstead, String methodName) {
-        return new DisguiseParseException(LibsMsg.PARSE_EXPECTED_RECEIVED,
-                ReflectionFlagWatchers.getParamInfo(paramType).getName(), receivedInstead, methodName);
-    }
-
-    private static ItemStack parseToItemstack(Class param, String method, String string) throws DisguiseParseException {
-        String[] split = string.split(":", -1);
-
-        if (split[0].isEmpty() || split[0].equalsIgnoreCase("null")) {
-            return null;
-        }
-
-        Material material = Material.getMaterial(split[0]);
-
-        if (material != null) {
-            short itemDura = 0;
-            int amount = 1;
-            boolean enchanted = false;
-
-            for (int i = 1; i < split.length; i++) {
-                String s = split[i];
-
-                if (!enchanted &&
-                        (s.equalsIgnoreCase("glow") || s.equalsIgnoreCase("glowing") || s.equalsIgnoreCase("enchant") ||
-                                s.equalsIgnoreCase("enchanted"))) {
-                    enchanted = true;
-                } else if (isInteger(s)) {
-                    if (i == (enchanted ? 2 : 1)) {
-                        itemDura = Short.parseShort(s);
-                    } else if (i == (enchanted ? 3 : 2)) {
-                        amount = Integer.parseInt(s);
-                    } else {
-                        throw parseToException(param, string, "%s");
-                    }
-                } else {
-                    throw parseToException(param, string, "%s");
-                }
-            }
-
-            ItemStack itemStack = new ItemStack(material, amount, itemDura);
-
-            if (enchanted) {
-                itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
-            }
-
-            return itemStack;
-        } else {
-            if (split.length == 1) {
-                throw parseToException(param, string, "%s");
-            } else {
-                throw parseToException(param, string, "%s");
+                methodToUse.invoke(disguise, valueToSet);
             }
         }
     }
