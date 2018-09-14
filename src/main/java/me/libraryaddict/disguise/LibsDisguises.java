@@ -40,22 +40,6 @@ public class LibsDisguises extends JavaPlugin {
 
         LibsPremium.check(getDescription().getVersion());
 
-        if (ReflectionManager.getMinecraftVersion().startsWith("1.13")) {
-            if (!LibsPremium.isPremium()) {
-                getLogger().severe("You must purchase the plugin to use 1.13!");
-                getLogger().severe("This will be released free two weeks after all bugs have been fixed!");
-                getLogger().severe("If you've already purchased the plugin, place the purchased jar inside the " +
-                        "Lib's Disguises plugin folder");
-                getPluginLoader().disablePlugin(this);
-                return;
-            }
-        } else {
-            getLogger().severe("You're using the wrong version of Lib's Disguises for your server! This is " +
-                    "intended for 1.13!");
-            getPluginLoader().disablePlugin(this);
-            return;
-        }
-
         PacketsManager.init(this);
         DisguiseUtilities.init(this);
 
@@ -71,8 +55,6 @@ public class LibsDisguises extends JavaPlugin {
 
         registerCommand("disguise", new DisguiseCommand());
         registerCommand("undisguise", new UndisguiseCommand());
-        registerCommand("disguiseplayer", new DisguisePlayerCommand());
-        registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
         registerCommand("undisguiseentity", new UndisguiseEntityCommand());
         registerCommand("disguiseentity", new DisguiseEntityCommand());
         registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
