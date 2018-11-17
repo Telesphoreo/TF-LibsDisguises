@@ -189,12 +189,10 @@ public class DisguisePermissions {
         Map<String, Boolean> permissions = new HashMap<>();
 
         // If the command sender is OP, then this will work even as the below code doesn't
-        for (String perm : new String[]{permissionNode + "*", "libsdisguises.*.*"}) {
-            if (!sender.hasPermission(perm)) {
-                continue;
-            }
-
-            permissions.put(perm, true);
+        // libsdisguises.[command].[disguise].[options]
+        // They can use all commands, all disguises, all options
+        if (sender.hasPermission("libsdisguises.*.*.*")) {
+            permissions.put("libsdisguises.*.*.*", true);
         }
 
         for (PermissionAttachmentInfo permission : sender.getEffectivePermissions()) {
@@ -267,6 +265,7 @@ public class DisguisePermissions {
             // Use boolean instead of setting to null, to inherit
             boolean disabled = true;
             PermissionStorage storage = new PermissionStorage(disguisePerm);
+            byte lastOptionInheritance = -1;
 
             for (ParsedPermission parsedPermission : list) {
                 // If this parsed permission doesn't handle this disguise type
@@ -294,9 +293,15 @@ public class DisguisePermissions {
                         disabled = false;
                     }
 
-                    // If the child disguise does not have any options defined, give them wildcard by default
-                    if (parsedPermission.options.isEmpty()) {
+                    // If the child disguise does not have any options defined
+                    // If the config doesn't require them to be given the permissions explictly
+                    // If they already have wildcard (Prevent next if)
+                    // Or this parsed permission is at a higher level than the last
+                    // That prevents 'cow' overriding 'cow.setBurning'
+                    if (parsedPermission.options.isEmpty() && !DisguiseConfig.isExplicitDisguisePermissions() &&
+                            (storage.wildcardAllow || lastOptionInheritance != parsedPermission.inheritance)) {
                         storage.wildcardAllow = true;
+
                         // If this disguise has options defined, unless wildcard was explictly given then remove it
                     } else if (!storage.permittedOptions.contains("*")) {
                         storage.wildcardAllow = false;
@@ -334,6 +339,10 @@ public class DisguisePermissions {
                     } else {
                         storage.negatedOptions.add(entry.getKey());
                     }
+                }
+
+                if (!parsedPermission.options.isEmpty()) {
+                    lastOptionInheritance = parsedPermission.inheritance;
                 }
             }
 
@@ -418,12 +427,18 @@ public class DisguisePermissions {
             return false;
         }
 
-        // If the disguise doesn't have a wildcard allow on it
-        // If the user is limited to a select range of options, and not all the options were found in the allowed
-        // options
-        if (!storage.wildcardAllow && !storage.permittedOptions.isEmpty() &&
-                !disguiseOptions.stream().allMatch(option -> storage.permittedOptions.contains(option.toLowerCase()))) {
-            return false;
+        // If they are able to use all permitted options by default, why bother checking what they can use
+        if (!storage.wildcardAllow) {
+            // If their permitted options are defined, or the denied options are not defined
+            // If they don't have permitted options defined, but they have denied options defined then they probably
+            // have an invisible wildcard allow
+            if (!storage.permittedOptions.isEmpty() || storage.negatedOptions.isEmpty()) {
+                // Check if they're trying to use anything they shouldn't
+                if (!disguiseOptions.stream()
+                        .allMatch(option -> storage.permittedOptions.contains(option.toLowerCase()))) {
+                    return false;
+                }
+            }
         }
 
         // If the user is using a forbidden option, return false. Otherwise true
