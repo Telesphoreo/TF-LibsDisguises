@@ -1,11 +1,5 @@
 package me.libraryaddict.disguise.utilities.packetlisteners;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.entity.Player;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -15,16 +9,20 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
-
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.PacketsManager;
 import me.libraryaddict.disguise.utilities.PacketsManager.LibsPackets;
 import me.libraryaddict.disguise.utilities.ReflectionManager;
+import org.bukkit.entity.Player;
 
-public class PacketListenerViewDisguises extends PacketAdapter {
-    public PacketListenerViewDisguises(LibsDisguises plugin) {
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PacketListenerViewSelfDisguise extends PacketAdapter {
+    public PacketListenerViewSelfDisguise(LibsDisguises plugin) {
         super(plugin, ListenerPriority.HIGH, Server.NAMED_ENTITY_SPAWN, Server.ATTACH_ENTITY, Server.REL_ENTITY_MOVE,
                 Server.REL_ENTITY_MOVE_LOOK, Server.ENTITY_LOOK, Server.ENTITY_TELEPORT, Server.ENTITY_HEAD_ROTATION,
                 Server.ENTITY_METADATA, Server.ENTITY_EQUIPMENT, Server.ANIMATION, Server.BED, Server.ENTITY_EFFECT,
@@ -39,10 +37,14 @@ public class PacketListenerViewDisguises extends PacketAdapter {
         try {
             final Player observer = event.getPlayer();
 
-            if (observer.getName().contains("UNKNOWN[")) // If the player is temporary
+            if (observer.getName().contains("UNKNOWN[")) {// If the player is temporary
                 return;
+            }
 
-            if (event.getPacket().getIntegers().read(0) != observer.getEntityId()) {
+            PacketContainer packet = event.getPacket();
+
+            // If packet isn't meant for the disguised player's self disguise
+            if (packet.getIntegers().read(0) != observer.getEntityId()) {
                 return;
             }
 
@@ -60,29 +62,30 @@ public class PacketListenerViewDisguises extends PacketAdapter {
 
             final Disguise disguise = DisguiseAPI.getDisguise(observer, observer);
 
-            if (disguise == null)
+            if (disguise == null) {
                 return;
-
-            // Here I grab the packets to convert them to, So I can display them as if the disguise sent them.
-            LibsPackets transformed = PacketsManager.transformPacket(event.getPacket(), disguise, observer, observer);
-
-            if (transformed.isUnhandled()) {
-                transformed.getPackets().add(event.getPacket());
             }
 
-            transformed.setPacketType(event.getPacketType());
+            // Here I grab the packets to convert them to, So I can display them as if the disguise sent them.
+            LibsPackets transformed = PacketsManager.transformPacket(packet, disguise, observer, observer);
 
-            for (PacketContainer packet : transformed.getPackets()) {
-                if (packet.getType() != Server.PLAYER_INFO) {
-                    if (packet.equals(event.getPacket())) {
-                        packet = packet.shallowClone();
+            if (transformed.isUnhandled()) {
+                transformed.getPackets().add(packet);
+            }
+
+            transformed.setSpawnPacketCheck(event.getPacketType());
+
+            for (PacketContainer newPacket : transformed.getPackets()) {
+                if (newPacket.getType() != Server.PLAYER_INFO) {
+                    if (newPacket.equals(packet)) {
+                        newPacket = newPacket.shallowClone();
                     }
 
-                    packet.getIntegers().write(0, DisguiseAPI.getSelfDisguiseId());
+                    newPacket.getIntegers().write(0, DisguiseAPI.getSelfDisguiseId());
                 }
 
                 try {
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(observer, packet, false);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(observer, newPacket, false);
                 }
                 catch (InvocationTargetException e) {
                     e.printStackTrace();
@@ -90,23 +93,25 @@ public class PacketListenerViewDisguises extends PacketAdapter {
             }
 
             for (ArrayList<PacketContainer> packets : transformed.getDelayedPackets()) {
-                for (PacketContainer packet : packets) {
-                    if (packet.getType() != Server.PLAYER_INFO) {
-                        if (packet.equals(event.getPacket())) {
-                            packet = packet.shallowClone();
-                        }
-
-                        packet.getIntegers().write(0, DisguiseAPI.getSelfDisguiseId());
+                for (PacketContainer newPacket : packets) {
+                    if (newPacket.getType() == Server.PLAYER_INFO) {
+                        continue;
                     }
+
+                    if (newPacket.equals(packet)) {
+                        newPacket = newPacket.shallowClone();
+                    }
+
+                    newPacket.getIntegers().write(0, DisguiseAPI.getSelfDisguiseId());
                 }
             }
 
             transformed.sendDelayed(observer);
 
             if (event.getPacketType() == Server.ENTITY_METADATA) {
-                event.setPacket(event.getPacket().deepClone());
+                event.setPacket(packet.deepClone());
 
-                for (WrappedWatchableObject watch : event.getPacket().getWatchableCollectionModifier().read(0)) {
+                for (WrappedWatchableObject watch : packet.getWatchableCollectionModifier().read(0)) {
                     if (watch.getIndex() == 0) {
                         byte b = (byte) watch.getValue();
 
@@ -121,14 +126,14 @@ public class PacketListenerViewDisguises extends PacketAdapter {
             } else if (event.getPacketType() == Server.NAMED_ENTITY_SPAWN) {
                 event.setCancelled(true);
 
-                PacketContainer packet = new PacketContainer(Server.ENTITY_METADATA);
+                PacketContainer metaPacket = new PacketContainer(Server.ENTITY_METADATA);
 
-                StructureModifier<Object> mods = packet.getModifier();
+                StructureModifier<Object> mods = metaPacket.getModifier();
 
                 mods.write(0, observer.getEntityId());
 
                 List<WrappedWatchableObject> watchableList = new ArrayList<>();
-                Byte b = 1 << 5;
+                byte b = 1 << 5;
 
                 if (observer.isSprinting())
                     b = (byte) (b | 1 << 3);
@@ -138,28 +143,28 @@ public class PacketListenerViewDisguises extends PacketAdapter {
                 if (watch != null)
                     watchableList.add(watch);
 
-                packet.getWatchableCollectionModifier().write(0, watchableList);
+                metaPacket.getWatchableCollectionModifier().write(0, watchableList);
 
                 try {
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(observer, packet);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(observer, metaPacket);
                 }
                 catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             } else if (event.getPacketType() == Server.ANIMATION) {
-                if (event.getPacket().getIntegers().read(1) != 2) {
+                if (packet.getIntegers().read(1) != 2) {
                     event.setCancelled(true);
                 }
-            } else if (event.getPacketType() == Server.ATTACH_ENTITY || event
-                    .getPacketType() == Server.REL_ENTITY_MOVE || event
-                    .getPacketType() == Server.REL_ENTITY_MOVE_LOOK || event
-                    .getPacketType() == Server.ENTITY_LOOK || event.getPacketType() == Server.ENTITY_TELEPORT || event
-                    .getPacketType() == Server.ENTITY_HEAD_ROTATION || event
-                    .getPacketType() == Server.ENTITY_EQUIPMENT) {
+            } else if (event.getPacketType() == Server.ATTACH_ENTITY ||
+                    event.getPacketType() == Server.REL_ENTITY_MOVE ||
+                    event.getPacketType() == Server.REL_ENTITY_MOVE_LOOK ||
+                    event.getPacketType() == Server.ENTITY_LOOK || event.getPacketType() == Server.ENTITY_TELEPORT ||
+                    event.getPacketType() == Server.ENTITY_HEAD_ROTATION ||
+                    event.getPacketType() == Server.ENTITY_EQUIPMENT) {
                 event.setCancelled(true);
             } else if (event.getPacketType() == Server.ENTITY_STATUS) {
-                if (disguise.isSelfDisguiseSoundsReplaced() && !disguise.getType().isPlayer() && event.getPacket()
-                        .getBytes().read(0) == 2) {
+                if (disguise.isSelfDisguiseSoundsReplaced() && !disguise.getType().isPlayer() &&
+                        packet.getBytes().read(0) == 2) {
                     event.setCancelled(true);
                 }
             }
