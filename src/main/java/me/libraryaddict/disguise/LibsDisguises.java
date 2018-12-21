@@ -83,7 +83,9 @@ public class LibsDisguises extends JavaPlugin {
             registerCommand("disguisemodifyplayer", new DisguiseModifyPlayerCommand());
             registerCommand("disguisemodifyradius",
                     new DisguiseModifyRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
-        }
+        } else {
+        getLogger().info("Commands has been disabled, as per config");
+    }
 
         infectWithMetrics();
     }
