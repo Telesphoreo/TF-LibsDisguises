@@ -108,8 +108,6 @@ public class DisguiseUtilities {
     }
 
     public static void saveDisguises() {
-        if (!LibsPremium.isPremium())
-            return;
 
         if (!DisguiseConfig.isSaveEntityDisguises() && !DisguiseConfig.isSavePlayerDisguises())
             return;
@@ -175,8 +173,6 @@ public class DisguiseUtilities {
     }
 
     public static void saveDisguises(UUID owningEntity, Disguise[] disguise) {
-        if (!LibsPremium.isPremium())
-            return;
 
         if (!savedDisguises.exists())
             savedDisguises.mkdirs();
@@ -217,7 +213,7 @@ public class DisguiseUtilities {
     }
 
     public static Disguise[] getSavedDisguises(UUID entityUUID, boolean remove) {
-        if (!isSavedDisguise(entityUUID) || !LibsPremium.isPremium()) {
+        if (!isSavedDisguise(entityUUID)) {
             return new Disguise[0];
         }
 
@@ -861,7 +857,6 @@ public class DisguiseUtilities {
         gsonBuilder.registerTypeAdapter(WrappedBlockData.class, new SerializerWrappedBlockData());
         gsonBuilder.registerTypeAdapter(Disguise.class, new SerializerDisguise());
         gsonBuilder.registerTypeAdapter(FlagWatcher.class, new SerializerFlagWatcher());
-        gsonBuilder.registerTypeAdapter(FlagWatcher.class, new SerializerChatComponent());
         gsonBuilder.registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer());
         gsonBuilder.registerTypeAdapter(ItemStack.class, new SerializerItemStack());
 

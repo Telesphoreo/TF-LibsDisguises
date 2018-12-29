@@ -236,75 +236,101 @@ public class DisguiseParser {
                     // Its a misc, we are going to use the MiscDisguise constructor.
                     ItemStack itemStack = new ItemStack(Material.STONE);
                     int miscId = -1;
+                    int miscData = -1;
+                    String secondArg = null;
 
                     if (args.length > 1) {
-                        switch (disguisePerm.getType()) {
-                            case FALLING_BLOCK:
-                            case DROPPED_ITEM:
-                                Material material = null;
+                        // They have defined more arguments!
+                        // If the first arg is a number
+                        if (args[1].contains(":")) {
+                            String[] split = args[1].split(":");
+                            if (isInteger(split[1])) {
+                                secondArg = split[1];
+                            }
+                            args[1] = split[0];
+                        }
 
+                        if (isInteger(args[1])) {
+                            miscId = Integer.parseInt(args[1]);
+                        } else {
+                            if (disguisePerm.getType() == DisguiseType.FALLING_BLOCK ||
+                                    disguisePerm.getType() == DisguiseType.DROPPED_ITEM) {
                                 for (Material mat : Material.values()) {
-                                    if (!mat.name().replace("_", "").equalsIgnoreCase(args[1].replace("_", ""))) {
-                                        continue;
-                                    }
-
-                                    material = mat;
-                                    break;
-                                }
-
-                                if (material == null) {
-                                    break;
-                                }
-
-                                itemStack = new ItemStack(material);
-
-                                if (!disguiseOptions.isEmpty()) {
-                                    String toCheck = "" + itemStack.getType().name();
-
-                                    if (!disguiseOptions.containsKey(toCheck) || !disguiseOptions.get(toCheck)) {
-                                        throw new DisguiseParseException(LibsMsg.PARSE_NO_PERM_PARAM, toCheck,
-                                                disguisePerm.toReadable());
+                                    if (mat.name().replace("_", "").equalsIgnoreCase(args[1].replace("_", ""))) {
+                                        itemStack = new ItemStack(mat);
+                                        miscId = mat.getId();
+                                        break;
                                     }
                                 }
-
+                            }
+                        }
+                        if (miscId != -1) {
+                            switch (disguisePerm.getType()) {
+                                case PAINTING:
+                                case FALLING_BLOCK:
+                                case SPLASH_POTION:
+                                case DROPPED_ITEM:
+                                case FISHING_HOOK:
+                                case ARROW:
+                                case TIPPED_ARROW:
+                                case SPECTRAL_ARROW:
+                                case SMALL_FIREBALL:
+                                case FIREBALL:
+                                case WITHER_SKULL:
+                                case TRIDENT:
+                                    break;
+                                default:
+                                    throw new DisguiseParseException(LibsMsg.PARSE_TOO_MANY_ARGS,
+                                            disguisePerm.toReadable(), args[1]);
+                            }
+                            toSkip++;
+                            // If they also defined a data value
+                            if (args.length > 2 && secondArg == null && isInteger(args[2])) {
+                                secondArg = args[2];
                                 toSkip++;
-
-                                if (disguisePerm.getType() == DisguiseType.FALLING_BLOCK) {
-                                    usedOptions.add("setblock");
-                                } else {
-                                    usedOptions.add("setitemstack");
+                            }
+                            if (secondArg != null) {
+                                if (disguisePerm.getType() != DisguiseType.FALLING_BLOCK &&
+                                        disguisePerm.getType() != DisguiseType.DROPPED_ITEM) {
+                                    throw new DisguiseParseException(LibsMsg.PARSE_USE_SECOND_NUM,
+                                            DisguiseType.FALLING_BLOCK.toReadable(),
+                                            DisguiseType.DROPPED_ITEM.toReadable());
                                 }
+                                miscData = Integer.parseInt(secondArg);
+                            }
+                        }
+                    }
 
-                                doCheck(sender, permissions, disguisePerm, usedOptions);
-                                break;
-                            case PAINTING:
-                            case SPLASH_POTION:
-                                if (!isInteger(args[1])) {
-                                    break;
-                                }
+                    if (!disguiseOptions.isEmpty() && miscId != -1) {
+                        String toCheck = "" + miscId;
 
-                                miscId = Integer.parseInt(args[1]);
-                                toSkip++;
+                        if (miscData == 0 || miscData == -1) {
+                            if (!disguiseOptions.containsKey(toCheck) || !disguiseOptions.get(toCheck)) {
+                                toCheck += ":0";
+                            }
+                        } else {
+                            toCheck += ":" + miscData;
+                        }
 
-                                if (!disguiseOptions.isEmpty()) {
-                                    String toCheck = "" + miscId;
+                        if (!disguiseOptions.containsKey(toCheck) || !disguiseOptions.get(toCheck)) {
+                            throw new DisguiseParseException(LibsMsg.PARSE_NO_PERM_PARAM, toCheck,
+                                    disguisePerm.toReadable());
+                        }
+                    }
 
-                                    if (!disguiseOptions.containsKey(toCheck) || !disguiseOptions.get(toCheck)) {
-                                        throw new DisguiseParseException(LibsMsg.PARSE_NO_PERM_PARAM, toCheck,
-                                                disguisePerm.toReadable());
-                                    }
-                                }
+                    if (miscId != -1) {
+                        if (disguisePerm.getType() == DisguiseType.FALLING_BLOCK) {
+                            usedOptions.add("setblock");
 
-                                if (disguisePerm.getType() == DisguiseType.PAINTING) {
-                                    usedOptions.add("setpainting");
-                                } else {
-                                    usedOptions.add("setpotionid");
-                                }
+                            doCheck(sender, permissions, disguisePerm, usedOptions);
+                        } else if (disguisePerm.getType() == DisguiseType.PAINTING) {
+                            usedOptions.add("setpainting");
 
-                                doCheck(sender, permissions, disguisePerm, usedOptions);
-                                break;
-                            default:
-                                break;
+                            doCheck(sender, permissions, disguisePerm, usedOptions);
+                        } else if (disguisePerm.getType() == DisguiseType.SPLASH_POTION) {
+                            usedOptions.add("setpotionid");
+
+                            doCheck(sender, permissions, disguisePerm, usedOptions);
                         }
                     }
 
@@ -313,7 +339,7 @@ public class DisguiseParser {
                             disguisePerm.getType() == DisguiseType.FALLING_BLOCK) {
                         disguise = new MiscDisguise(disguisePerm.getType(), itemStack);
                     } else {
-                        disguise = new MiscDisguise(disguisePerm.getType(), miscId);
+                        disguise = new MiscDisguise(disguisePerm.getType(), miscId, miscData);
                     }
                 }
             }

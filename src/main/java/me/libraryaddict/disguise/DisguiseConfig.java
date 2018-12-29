@@ -2,7 +2,6 @@ package me.libraryaddict.disguise;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.PacketsManager;
 import me.libraryaddict.disguise.utilities.TranslateType;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
@@ -20,13 +19,6 @@ public class DisguiseConfig {
         MODIFY_SCOREBOARD,
         IGNORE_SCOREBOARD,
         CREATE_SCOREBOARD;
-    }
-
-    public enum UpdatesBranch {
-        SAME_BUILDS,
-        SNAPSHOTS,
-        RELEASES,
-        NONE
     }
 
     private static boolean animationEnabled;
@@ -76,15 +68,6 @@ public class DisguiseConfig {
     private static boolean explicitDisguisePermissions;
     private static boolean disableCommands;
     private static int uuidGeneratedVersion;
-    private static UpdatesBranch updatesBranch = UpdatesBranch.SAME_BUILDS;
-
-    public static UpdatesBranch getUpdatesBranch() {
-        return updatesBranch;
-    }
-
-    public static void setUpdatesBranch(UpdatesBranch newBranch) {
-        updatesBranch = newBranch;
-    }
 
     public static int getUUIDGeneratedVersion() {
         return uuidGeneratedVersion;
@@ -272,18 +255,6 @@ public class DisguiseConfig {
         setExplicitDisguisePermissions(config.getBoolean("Permissions.ExplictDisguises"));
         setUUIDGeneratedVersion(config.getInt("UUIDVersion"));
 
-        if (!LibsPremium.isPremium() && (isSavePlayerDisguises() || isSaveEntityDisguises())) {
-            DisguiseUtilities.getLogger().warning("You must purchase the plugin to use saved disguises!");
-        }
-
-        try {
-            setUpdatesBranch(UpdatesBranch.valueOf(config.getString("UpdatesBranch").toUpperCase()));
-        }
-        catch (Exception ex) {
-            DisguiseUtilities.getLogger().warning("Cannot parse '" + config.getString("UpdatesBranch") +
-                    "' to a valid option for UpdatesBranch");
-        }
-
         try {
             String option = config.getString("SelfDisguisesScoreboard", DisguisePushing.MODIFY_SCOREBOARD.name())
                     .toUpperCase();
@@ -294,7 +265,7 @@ public class DisguiseConfig {
             disablePushing = DisguisePushing.valueOf(option);
         }
         catch (Exception ex) {
-            DisguiseUtilities.getLogger().warning("Cannot parse '" + config.getString("SelfDisguisesScoreboard") +
+            DisguiseUtilities.getLogger().info("Cannot parse '" + config.getString("SelfDisguisesScoreboard") +
                     "' to a valid option for SelfDisguisesTeam");
         }
 
