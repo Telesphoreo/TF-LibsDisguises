@@ -1,10 +1,8 @@
 package me.libraryaddict.disguise.utilities;
 
-import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -42,12 +40,9 @@ public class LibsPremium {
                     thisPluginIsPaidFor = (Boolean) m.invoke(null);
                     String pluginVersion;
 
-                    try (InputStream stream = cl.getResourceAsStream("plugin.yml")) {
-                        YamlConfiguration config = new YamlConfiguration();
-                        config.loadFromString(IOUtils.toString(stream, "UTF-8"));
+                    YamlConfiguration config = ReflectionManager.getPluginYaml(cl);
 
-                        pluginVersion = config.getString("version");
-                    }
+                    pluginVersion = config.getString("version");
 
                     if (isPremium()) {
                         // Found a premium Lib's Disguises jar (v5.2.6), premium enabled!
@@ -62,7 +57,12 @@ public class LibsPremium {
                                         ") in the folder!");
                     }
                 }
+                catch (ClassNotFoundException ex) {
+                    DisguiseUtilities.getLogger()
+                            .warning("Found an unrecognized jar in the LibsDisguises folder (" + file.getName() + ")");
+                }
                 catch (Exception ex) {
+                    DisguiseUtilities.getLogger().warning("Error while trying to handle the file " + file.getName());
                     ex.printStackTrace();
                     // Don't print off errors
                 }
