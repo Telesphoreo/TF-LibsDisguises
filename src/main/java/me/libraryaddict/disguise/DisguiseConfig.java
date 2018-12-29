@@ -2,7 +2,6 @@ package me.libraryaddict.disguise;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.PacketsManager;
 import me.libraryaddict.disguise.utilities.TranslateType;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
@@ -270,10 +269,6 @@ public class DisguiseConfig {
         disableCommands = config.getBoolean("DisableCommands");
         setExplicitDisguisePermissions(config.getBoolean("Permissions.ExplictDisguises"));
         setUUIDGeneratedVersion(config.getInt("UUIDVersion"));
-
-        if (!LibsPremium.isPremium() && (isSavePlayerDisguises() || isSaveEntityDisguises())) {
-            DisguiseUtilities.getLogger().warning("You must purchase the plugin to use saved disguises!");
-        }
 
         try {
             setUpdatesBranch(UpdatesBranch.valueOf(config.getString("UpdatesBranch").toUpperCase()));

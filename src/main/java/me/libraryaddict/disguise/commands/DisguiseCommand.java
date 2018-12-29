@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.commands;
 
+import me.totalfreedom.disguise.DisguiseBlocker;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
@@ -9,8 +10,6 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsMsg;
 import me.libraryaddict.disguise.utilities.parser.*;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
-import me.totalfreedom.libsdisguise.DisallowedDisguises;
-import me.totalfreedom.libsdisguise.TF_DisguiseAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -66,6 +65,20 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
             }
         }
 
+        // TFM Start
+        if (DisguiseBlocker.enabled) {
+            if (DisguiseBlocker.isAllowed(disguise, (Player) sender)) {
+                disguise.startDisguise();
+            } else {
+                sender.sendMessage(ChatColor.RED + "That disguise is forbidden.");
+                return true;
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Disguises are disabled.");
+            return true;
+        }
+        // TFM End
+
         disguise.setEntity((Player) sender);
 
         if (!setViewDisguise(args)) {
@@ -73,24 +86,6 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
             if (DisguiseAPI.hasSelfDisguisePreference(disguise.getEntity()) &&
                     disguise.isSelfDisguiseVisible() == DisguiseConfig.isViewDisguises())
                 disguise.setViewSelfDisguise(!disguise.isSelfDisguiseVisible());
-        }
-
-        if (!TF_DisguiseAPI.disabled)
-        {
-            if (DisallowedDisguises.isAllowed(disguise))
-            {
-                disguise.startDisguise();
-            }
-            else
-            {
-                sender.sendMessage(LibsMsg.FORBIDDEN_DISGUISE.get());
-                return true;
-            }
-        }
-        else
-        {
-            sender.sendMessage(LibsMsg.DISGUISES_DISABLED.get());
-            return true;
         }
 
         if (disguise.isDisguiseInUse()) {

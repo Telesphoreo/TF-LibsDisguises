@@ -13,9 +13,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import me.totalfreedom.disguise.DisguiseBlocker;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -28,24 +29,16 @@ import java.util.HashSet;
 public class LibsDisguises extends JavaPlugin {
     private static LibsDisguises instance;
     private DisguiseListener listener;
-    private String buildNumber;
 
     @Override
     public void onEnable() {
         instance = this;
 
+        getLogger().info("Discovered nms version: " + ReflectionManager.getBukkitVersion());
+
         if (!new File(getDataFolder(), "disguises.yml").exists()) {
             saveResource("disguises.yml", false);
         }
-
-        YamlConfiguration pluginYml = ReflectionManager.getPluginYaml(getClassLoader());
-        buildNumber = StringUtils.stripToNull(pluginYml.getString("build-number"));
-
-        getLogger().info("Discovered nms version: " + ReflectionManager.getBukkitVersion());
-
-        getLogger().info("Jenkins Build: " + (isNumberedBuild() ? "#" : "") + getBuildNo());
-
-        LibsPremium.check(getDescription().getVersion());
 
         if (!ReflectionManager.getMinecraftVersion().startsWith("1.13")) {
             getLogger().severe("You're using the wrong version of Lib's Disguises for your server! This is " +
@@ -70,71 +63,18 @@ public class LibsDisguises extends JavaPlugin {
         if (!DisguiseConfig.isDisableCommands()) {
             registerCommand("disguise", new DisguiseCommand());
             registerCommand("undisguise", new UndisguiseCommand());
-            registerCommand("disguiseplayer", new DisguisePlayerCommand());
-            registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
-            registerCommand("undisguiseentity", new UndisguiseEntityCommand());
-            registerCommand("disguiseentity", new DisguiseEntityCommand());
-            registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
-            registerCommand("undisguiseradius", new UndisguiseRadiusCommand(getConfig().getInt("UndisguiseRadiusMax")));
             registerCommand("disguisehelp", new DisguiseHelpCommand());
             registerCommand("disguiseclone", new DisguiseCloneCommand());
             registerCommand("libsdisguises", new LibsDisguisesCommand());
             registerCommand("disguiseviewself", new DisguiseViewSelfCommand());
             registerCommand("disguisemodify", new DisguiseModifyCommand());
-            registerCommand("disguisemodifyentity", new DisguiseModifyEntityCommand());
-            registerCommand("disguisemodifyplayer", new DisguiseModifyPlayerCommand());
-            registerCommand("disguisemodifyradius",
-                    new DisguiseModifyRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
-        } else {
-            getLogger().info("Commands has been disabled, as per config");
         }
 
         infectWithMetrics();
     }
 
-    @Override
-    public void onDisable() {
-        DisguiseUtilities.saveDisguises();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            DisguiseUtilities.removeSelfDisguiseScoreboard(player);
-        }
-    }
-
     private void infectWithMetrics() {
-        String version = getDescription().getVersion();
-
-        // If a release build, attach build number
-        if (!isReleaseBuild() || !LibsPremium.isPremium()) {
-            version += "-";
-
-            // 9.7.0-SNAPSHOT-b30
-            if (isNumberedBuild()) {
-                version += "b";
-            }
-            // else 9.7.0-SNAPSHOT-unknown
-
-            version += getBuildNo();
-        }
-
-        Metrics metrics = new Metrics(this, version);
-
-        final String premium = LibsPremium.isPremium() ?
-                getDescription().getVersion().contains("SNAPSHOT") ? "Paid Builds" : "Paid Plugin" : "Free Builds";
-
-        metrics.addCustomChart(new Metrics.SimplePie("premium") {
-            @Override
-            public String getValue() {
-                return premium;
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("translations") {
-            @Override
-            public String getValue() {
-                return LibsPremium.isPremium() && DisguiseConfig.isUseTranslations() ? "Yes" : "No";
-            }
-        });
+        Metrics metrics = new Metrics(this);
 
         metrics.addCustomChart(new Metrics.SimplePie("custom_disguises") {
             @Override
@@ -233,6 +173,7 @@ public class LibsDisguises extends JavaPlugin {
             }
         });
 
+
         metrics.addCustomChart(new Metrics.SimplePie("commands") {
             @Override
             public String getValue() {
@@ -261,15 +202,6 @@ public class LibsDisguises extends JavaPlugin {
                 return updates ? "Enabled" : "Disabled";
             }
         });
-
-        if (getBuildNo() != null) {
-            metrics.addCustomChart(new Metrics.SimplePie("build_number") {
-                @Override
-                public String getValue() {
-                    return getBuildNo();
-                }
-            });
-        }
 
         metrics.addCustomChart(new Metrics.SimplePie("targeted_disguises") {
             /**
@@ -303,16 +235,18 @@ public class LibsDisguises extends JavaPlugin {
         });
     }
 
-    public boolean isReleaseBuild() {
-        return !getDescription().getVersion().contains("-SNAPSHOT");
+    public void toggleUsability(boolean enable)
+    {
+        DisguiseBlocker.enabled = enable;
     }
 
-    public String getBuildNo() {
-        return buildNumber;
-    }
+    @Override
+    public void onDisable() {
+        DisguiseUtilities.saveDisguises();
 
-    public boolean isNumberedBuild() {
-        return getBuildNo() != null && getBuildNo().matches("[0-9]+");
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            DisguiseUtilities.removeSelfDisguiseScoreboard(player);
+        }
     }
 
     private void registerCommand(String commandName, CommandExecutor executioner) {

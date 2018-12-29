@@ -35,10 +35,6 @@ public enum TranslateType {
             type.loadTranslations();
         }
 
-        if (!LibsPremium.isPremium() && DisguiseConfig.isUseTranslations()) {
-            DisguiseUtilities.getLogger().severe("You must purchase the plugin to use translations!");
-        }
-
         TranslateFiller.fillConfigs();
     }
 
@@ -73,7 +69,7 @@ public enum TranslateType {
     private void loadTranslations() {
         translated.clear();
 
-        if (LibsPremium.isPremium() && DisguiseConfig.isUseTranslations()) {
+        if (DisguiseConfig.isUseTranslations()) {
             DisguiseUtilities.getLogger().info("Loading translations: " + name());
         }
 
@@ -123,7 +119,7 @@ public enum TranslateType {
             e.printStackTrace();
         }
 
-        if (LibsPremium.isPremium() && DisguiseConfig.isUseTranslations()) {
+        if (DisguiseConfig.isUseTranslations()) {
             DisguiseUtilities.getLogger().info("Loaded " + translated.size() + " translations for " + name());
         }
     }
@@ -178,7 +174,7 @@ public enum TranslateType {
     }
 
     public String reverseGet(String translated) {
-        if (translated == null || !LibsPremium.isPremium() || !DisguiseConfig.isUseTranslations())
+        if (translated == null || !DisguiseConfig.isUseTranslations())
             return translated;
 
         String lowerCase = translated.toLowerCase();
@@ -194,7 +190,7 @@ public enum TranslateType {
     }
 
     public String get(String msg) {
-        if (msg == null || !LibsPremium.isPremium() || !DisguiseConfig.isUseTranslations())
+        if (msg == null || !DisguiseConfig.isUseTranslations())
             return msg;
 
         String toReturn = translated.get(msg);
