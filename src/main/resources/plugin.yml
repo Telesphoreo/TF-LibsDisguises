@@ -2,9 +2,11 @@ name: LibsDisguises
 main: me.libraryaddict.disguise.LibsDisguises
 description: A disguise plugin with various disguises.
 version: ${project.version}
+build-number: ${build.number}
 author: libraryaddict
 authors: [Byteflux, Navid K.]
 depend: [ProtocolLib]
+api-version: 1.13
 commands:
     libsdisguises:
       permission: libsdisguises.seecmd.libsdisguises
@@ -21,6 +23,10 @@ commands:
       aliases: [dhelp, dishelp]
       permission: libsdisguises.seecmd.disguisehelp
       description: Help command for LibsDisguises.
+    disguiseplayer:
+      aliases: [dplayer, displayer]
+      permission: libsdisguises.seecmd.disguiseplayer
+      description: Disguise another player as an entity.
     disguiseradius:
       aliases: [disradius, dradius]
       permission: libsdisguises.seecmd.disguiseradius
@@ -33,6 +39,10 @@ commands:
       aliases: [undisentity, undentity]
       permission: libsdisguises.seecmd.undisguiseentity
       description: Undisguise an entity.
+    undisguiseplayer:
+      aliases: [undisplayer, undplayer]
+      permission: libsdisguises.seecmd.undisguiseplayer
+      description: Undisguise a player.
     undisguiseradius:
       aliases: [undisradius, undradius]
       permission: libsdisguises.seecmd.undisguiseradius
@@ -121,5 +131,3 @@ permissions:
       description: See the /disguisemodifyradius command in tab-completion
     libsdisguises.seecmd.disguisemodifyentity:
       description: See the /disguisemodifyentity command in tab-completion
-
-api-version: 1.13
