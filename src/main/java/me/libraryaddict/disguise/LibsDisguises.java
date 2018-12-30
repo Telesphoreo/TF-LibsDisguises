@@ -7,6 +7,7 @@ import me.libraryaddict.disguise.commands.*;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.*;
 import me.libraryaddict.disguise.utilities.*;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
@@ -301,6 +302,11 @@ public class LibsDisguises extends JavaPlugin {
                 return "No";
             }
         });
+    }
+
+    public void toggleUsability(boolean enable)
+    {
+        DisguiseBlocker.enabled = enable;
     }
 
     public boolean isReleaseBuild() {
