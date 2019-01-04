@@ -4,9 +4,18 @@ import com.comphenix.protocol.reflect.FieldAccessException;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import me.libraryaddict.disguise.commands.*;
-import me.libraryaddict.disguise.disguisetypes.*;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import me.libraryaddict.disguise.disguisetypes.watchers.*;
-import me.libraryaddict.disguise.utilities.*;
+import me.libraryaddict.disguise.utilities.DisguiseSound;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.LibsPremium;
+import me.libraryaddict.disguise.utilities.metrics.MetricsInitalizer;
+import me.libraryaddict.disguise.utilities.packets.PacketsManager;
+import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
+import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,9 +31,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class LibsDisguises extends JavaPlugin {
     private static LibsDisguises instance;
@@ -71,8 +77,6 @@ public class LibsDisguises extends JavaPlugin {
         if (!DisguiseConfig.isDisableCommands()) {
             registerCommand("disguise", new DisguiseCommand());
             registerCommand("undisguise", new UndisguiseCommand());
-            registerCommand("disguiseplayer", new DisguisePlayerCommand());
-            registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
             registerCommand("undisguiseentity", new UndisguiseEntityCommand());
             registerCommand("disguiseentity", new DisguiseEntityCommand());
             registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
@@ -90,7 +94,7 @@ public class LibsDisguises extends JavaPlugin {
             getLogger().info("Commands has been disabled, as per config");
         }
 
-        infectWithMetrics();
+        new MetricsInitalizer();
     }
 
     @Override
@@ -100,213 +104,6 @@ public class LibsDisguises extends JavaPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             DisguiseUtilities.removeSelfDisguiseScoreboard(player);
         }
-    }
-
-    private void infectWithMetrics() {
-        String version = getDescription().getVersion();
-
-        // If a release build, attach build number
-        if (!isReleaseBuild() || !LibsPremium.isPremium()) {
-            version += "-";
-
-            // 9.7.0-SNAPSHOT-b30
-            if (isNumberedBuild()) {
-                version += "b";
-            }
-            // else 9.7.0-SNAPSHOT-unknown
-
-            version += getBuildNo();
-        }
-
-        Metrics metrics = new Metrics(this, version);
-
-        final String premium = LibsPremium.isPremium() ?
-                getDescription().getVersion().contains("SNAPSHOT") ? "Paid Builds" : "Paid Plugin" : "Free Builds";
-
-        metrics.addCustomChart(new Metrics.SimplePie("premium") {
-            @Override
-            public String getValue() {
-                return premium;
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("translations") {
-            @Override
-            public String getValue() {
-                return LibsPremium.isPremium() && DisguiseConfig.isUseTranslations() ? "Yes" : "No";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("custom_disguises") {
-            @Override
-            public String getValue() {
-                HashMap map = DisguiseConfig.getCustomDisguises();
-
-                return map.size() + (map.containsKey("libraryaddict") ? -1 : 0) > 0 ? "Yes" : "No";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.MultiLineChart("disguised_entities") {
-            @Override
-            public HashMap<String, Integer> getValues(HashMap<String, Integer> hashMap) {
-                for (HashSet<TargetedDisguise> list : DisguiseUtilities.getDisguises().values()) {
-                    for (Disguise disg : list) {
-                        if (disg.getEntity() == null || !disg.isDisguiseInUse())
-                            continue;
-
-                        String name = disg.getEntity().getType().name();
-
-                        hashMap.put(name, hashMap.containsKey(name) ? hashMap.get(name) + 1 : 1);
-                    }
-                }
-
-                return hashMap;
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.MultiLineChart("disguises_used") {
-            @Override
-            public HashMap<String, Integer> getValues(HashMap<String, Integer> hashMap) {
-                for (HashSet<TargetedDisguise> list : DisguiseUtilities.getDisguises().values()) {
-                    for (Disguise disg : list) {
-                        if (disg.getEntity() == null || !disg.isDisguiseInUse())
-                            continue;
-
-                        String name = disg.getType().name();
-
-                        hashMap.put(name, hashMap.containsKey(name) ? hashMap.get(name) + 1 : 1);
-                    }
-                }
-
-                return hashMap;
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("disguised_using") {
-            @Override
-            public String getValue() {
-                if (DisguiseUtilities.isPluginsUsed()) {
-                    if (DisguiseUtilities.isCommandsUsed()) {
-                        return "Plugins and Commands";
-                    }
-
-                    return "Plugins";
-                } else if (DisguiseUtilities.isCommandsUsed()) {
-                    return "Commands";
-                }
-
-                return "Unknown";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("active_disguises") {
-            @Override
-            public String getValue() {
-                int disgs = 0;
-
-                for (HashSet set : DisguiseUtilities.getDisguises().values()) {
-                    disgs += set.size();
-                }
-
-                if (disgs == 0)
-                    return "0";
-                if (disgs <= 5)
-                    return "1 to 5";
-                else if (disgs <= 15)
-                    return "6 to 15";
-                else if (disgs <= 30)
-                    return "16 to 30";
-                else if (disgs <= 60)
-                    return "30 to 60";
-                else if (disgs <= 100)
-                    return "60 to 100";
-                else if (disgs <= 200)
-                    return "100 to 200";
-
-                return "More than 200";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("self_disguises") {
-            @Override
-            public String getValue() {
-                return DisguiseConfig.isViewDisguises() ? "Yes" : "No";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("commands") {
-            @Override
-            public String getValue() {
-                return DisguiseConfig.isDisableCommands() ? "Enabled" : "Disabled";
-            }
-        });
-
-        metrics.addCustomChart(new Metrics.SimplePie("spigot") {
-            @Override
-            public String getValue() {
-                try {
-                    Class.forName("org.spigotmc.SpigotConfig");
-                    return "Yes";
-                }
-                catch (Exception ex) {
-                    return "No";
-                }
-            }
-        });
-
-        final boolean updates = getConfig().getBoolean("NotifyUpdate");
-
-        metrics.addCustomChart(new Metrics.SimplePie("updates") {
-            @Override
-            public String getValue() {
-                return updates ? "Enabled" : "Disabled";
-            }
-        });
-
-        if (getBuildNo() != null) {
-            metrics.addCustomChart(new Metrics.SimplePie("build_number") {
-                @Override
-                public String getValue() {
-                    return getBuildNo();
-                }
-            });
-        }
-
-        metrics.addCustomChart(new Metrics.SimplePie("targeted_disguises") {
-            /**
-             * Store value just to minimize amount of times it's called, and to persist even when not using anymore
-             */
-            private boolean targetedDisguises;
-
-            @Override
-            public String getValue() {
-                if (targetedDisguises) {
-                    return "Yes";
-                }
-
-                Collection<HashSet<TargetedDisguise>> list = DisguiseUtilities.getDisguises().values();
-
-                if (list.isEmpty())
-                    return "Unknown";
-
-                for (HashSet<TargetedDisguise> dList : list) {
-                    for (TargetedDisguise disg : dList) {
-                        if (disg.getObservers().isEmpty())
-                            continue;
-
-                        targetedDisguises = true;
-                        return "Yes";
-                    }
-                }
-
-                return "No";
-            }
-        });
-    }
-
-    public void toggleUsability(boolean enable)
-    {
-        DisguiseBlocker.enabled = enable;
     }
 
     public boolean isReleaseBuild() {
@@ -337,6 +134,15 @@ public class LibsDisguises extends JavaPlugin {
     @Deprecated
     public void reload() {
         DisguiseConfig.loadConfig();
+    }
+
+    /**
+     * Used for enabling/disabling disguises through TotalFreedomMod.
+     *
+     * @param enable The return status of whether disguises are enabled.
+     */
+    public void toggleUsability(boolean enable) {
+        DisguiseBlocker.enabled = enable;
     }
 
     /**
@@ -405,8 +211,7 @@ public class LibsDisguises extends JavaPlugin {
                                         "Watcher");
                         break;
                 }
-            }
-            catch (ClassNotFoundException ex) {
+            } catch (ClassNotFoundException ex) {
                 // There is no explicit watcher for this entity.
                 Class entityClass = disguiseType.getEntityType().getEntityClass();
 
@@ -632,8 +437,7 @@ public class LibsDisguises extends JavaPlugin {
                 }
 
                 disguiseValues.setEntitySize(ReflectionManager.getSize(bukkitEntity));
-            }
-            catch (SecurityException | IllegalArgumentException | IllegalAccessException | FieldAccessException ex) {
+            } catch (SecurityException | IllegalArgumentException | IllegalAccessException | FieldAccessException ex) {
                 getLogger().severe("Uh oh! Trouble while making values for the disguise " + disguiseType.name() + "!");
                 getLogger().severe("Before reporting this error, " +
                         "please make sure you are using the latest version of LibsDisguises and ProtocolLib.");

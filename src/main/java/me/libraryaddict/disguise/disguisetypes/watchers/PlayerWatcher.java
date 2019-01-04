@@ -1,21 +1,19 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.MainHand;
-
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
-
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.MainHand;
 
 public class PlayerWatcher extends LivingWatcher {
     private boolean isInBed;
@@ -218,8 +216,7 @@ public class PlayerWatcher extends LivingWatcher {
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
                     }
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }

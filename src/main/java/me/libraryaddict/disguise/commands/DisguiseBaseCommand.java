@@ -64,7 +64,9 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
             if (type.isUnknown())
                 continue;
 
-            allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            if (DisguiseBlocker.isAllowed(type.getType()) && !type.isUnknown()) {
+                allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            }
         }
 
         return allowedDisguises;
@@ -107,8 +109,7 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
         try {
             Integer.parseInt(string);
             return true;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return false;
         }
     }

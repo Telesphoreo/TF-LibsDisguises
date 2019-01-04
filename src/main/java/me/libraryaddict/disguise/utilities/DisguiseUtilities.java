@@ -6,10 +6,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
@@ -22,8 +19,14 @@ import me.libraryaddict.disguise.disguisetypes.TargetedDisguise.TargetType;
 import me.libraryaddict.disguise.disguisetypes.watchers.AgeableWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.ZombieWatcher;
-import me.libraryaddict.disguise.utilities.PacketsManager.LibsPackets;
 import me.libraryaddict.disguise.utilities.json.*;
+import me.libraryaddict.disguise.utilities.packets.LibsPackets;
+import me.libraryaddict.disguise.utilities.packets.PacketsManager;
+import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
+import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
+import me.libraryaddict.disguise.utilities.reflection.LibsProfileLookup;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.bukkit.Bukkit;
@@ -31,10 +34,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Ageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -206,8 +206,7 @@ public class DisguiseUtilities {
 
                 savedDisguiseList.add(owningEntity);
             }
-        }
-        catch (StackOverflowError | Exception e) {
+        } catch (StackOverflowError | Exception e) {
             e.printStackTrace();
         }
     }
@@ -246,8 +245,7 @@ public class DisguiseUtilities {
             }
 
             return disguises;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             getLogger().severe("Malformed disguise for " + entityUUID);
             e.printStackTrace();
         }
@@ -351,8 +349,7 @@ public class DisguiseUtilities {
             writer.close();
 
             cachedNames.add(string.toLowerCase());
-        }
-        catch (StackOverflowError | Exception e) {
+        } catch (StackOverflowError | Exception e) {
             e.printStackTrace();
         }
     }
@@ -454,8 +451,7 @@ public class DisguiseUtilities {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, destroyPacket);
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -536,7 +532,7 @@ public class DisguiseUtilities {
     }
 
     public static PacketContainer[] getBedPackets(Location sleepingLocation, Location playerLocation,
-            PlayerDisguise disguise) {
+                                                  PlayerDisguise disguise) {
         int entity = disguise.getEntity().getEntityId();
         PlayerWatcher watcher = disguise.getWatcher();
 
@@ -555,7 +551,7 @@ public class DisguiseUtilities {
         teleport.getIntegers().write(0, entity);
 
         doubles.write(0, sleepingLocation.getX());
-        doubles.write(1, PacketsManager.getYModifier(disguise.getEntity(), disguise) + sleepingLocation.getY());
+        doubles.write(1, DisguiseUtilities.getYModifier(disguise.getEntity(), disguise) + sleepingLocation.getY());
         doubles.write(2, sleepingLocation.getZ());
 
         return new PacketContainer[]{setBed, teleport};
@@ -635,8 +631,7 @@ public class DisguiseUtilities {
             reader.close();
 
             return gson.fromJson(cached, WrappedGameProfile.class);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -691,8 +686,7 @@ public class DisguiseUtilities {
                     }
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -748,12 +742,12 @@ public class DisguiseUtilities {
      * using schedulers. The runnable is run once the GameProfile has been successfully dealt with
      */
     public static WrappedGameProfile getProfileFromMojang(String playerName, LibsProfileLookup runnableIfCantReturn,
-            boolean contactMojang) {
+                                                          boolean contactMojang) {
         return getProfileFromMojang(playerName, (Object) runnableIfCantReturn, contactMojang);
     }
 
     private static WrappedGameProfile getProfileFromMojang(final String origName, final Object runnable,
-            boolean contactMojang) {
+                                                           boolean contactMojang) {
         final String playerName = origName.toLowerCase();
 
         if (DisguiseConfig.isSaveGameProfiles() && hasGameProfile(playerName)) {
@@ -802,8 +796,7 @@ public class DisguiseUtilities {
                                     }
                                 }
                             });
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             runnables.remove(playerName);
 
                             getLogger().severe("Error when fetching " + playerName + "'s uuid from mojang: " +
@@ -842,7 +835,7 @@ public class DisguiseUtilities {
      * using schedulers. The runnable is run once the GameProfile has been successfully dealt with
      */
     public static WrappedGameProfile getProfileFromMojang(String playerName, Runnable runnableIfCantReturn,
-            boolean contactMojang) {
+                                                          boolean contactMojang) {
         return getProfileFromMojang(playerName, (Object) runnableIfCantReturn, contactMojang);
     }
 
@@ -946,8 +939,7 @@ public class DisguiseUtilities {
             threadField.setAccessible(true);
 
             mainThread = (Thread) threadField.get(ReflectionManager.getMinecraftServer());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1002,8 +994,7 @@ public class DisguiseUtilities {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                     try {
                         DisguiseUtilities.sendSelfDisguise((Player) disguise.getEntity(), disguise);
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }, 2);
@@ -1037,16 +1028,14 @@ public class DisguiseUtilities {
                     Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                         try {
                             updatePlayer.invoke(entityTrackerEntry, p);
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             ex.printStackTrace();
                         }
                     }, 2);
                     break;
                 }
             }
-        }
-        catch (
+        } catch (
 
                 Exception ex) {
             ex.printStackTrace();
@@ -1089,16 +1078,14 @@ public class DisguiseUtilities {
                             Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                                 try {
                                     updatePlayer.invoke(entityTrackerEntry, p);
-                                }
-                                catch (Exception ex) {
+                                } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
                             }, 2);
                         }
                     }
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -1128,8 +1115,7 @@ public class DisguiseUtilities {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                     try {
                         DisguiseUtilities.sendSelfDisguise((Player) disguise.getEntity(), disguise);
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }, 2);
@@ -1160,16 +1146,14 @@ public class DisguiseUtilities {
                         Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                             try {
                                 updatePlayer.invoke(entityTrackerEntry, p);
-                            }
-                            catch (Exception ex) {
+                            } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
                         }, 2);
                     }
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -1217,8 +1201,7 @@ public class DisguiseUtilities {
 
         try {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1246,8 +1229,7 @@ public class DisguiseUtilities {
                             .get(entityTrackerEntry)).remove(ReflectionManager.getNmsEntity(player));
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1257,8 +1239,7 @@ public class DisguiseUtilities {
                     .createPacketConstructor(Server.ENTITY_METADATA, player.getEntityId(),
                             WrappedDataWatcher.getEntityWatcher(player), true)
                     .createPacket(player.getEntityId(), WrappedDataWatcher.getEntityWatcher(player), true));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1551,8 +1532,7 @@ public class DisguiseUtilities {
                 Field field = ReflectionManager.getNmsClass("EntityTrackerEntry").getDeclaredField("isMoving");
                 field.setAccessible(true);
                 isMoving = field.getBoolean(entityTrackerEntry);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -1624,8 +1604,7 @@ public class DisguiseUtilities {
                         manager.createPacketConstructor(Server.ENTITY_EFFECT, player.getEntityId(), mobEffect)
                                 .createPacket(player.getEntityId(), mobEffect));
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -1649,7 +1628,7 @@ public class DisguiseUtilities {
             return;
         }
 
-        LibsPackets transformed = PacketsManager.transformPacket(packet, disguise, player, player);
+        LibsPackets transformed = PacketsManager.getPacketsHandler().transformPacket(packet, disguise, player, player);
 
         try {
             if (transformed.isUnhandled())
@@ -1664,8 +1643,7 @@ public class DisguiseUtilities {
             }
 
             transformed.sendDelayed(player);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -1711,5 +1689,159 @@ public class DisguiseUtilities {
                 player.updateInventory();
             }
         }
+    }
+
+    /**
+     * Create a new datawatcher but with the 'correct' values
+     */
+    public static WrappedDataWatcher createSanitizedDataWatcher(WrappedDataWatcher entityWatcher,
+                                                                FlagWatcher disguiseWatcher) {
+        WrappedDataWatcher newWatcher = new WrappedDataWatcher();
+
+        try {
+            List<WrappedWatchableObject> list = DisguiseConfig.isMetadataPacketsEnabled() ?
+                    disguiseWatcher.convert(entityWatcher.getWatchableObjects()) :
+                    disguiseWatcher.getWatchableObjects();
+
+            for (WrappedWatchableObject watchableObject : list) {
+                if (watchableObject == null)
+                    continue;
+
+                if (watchableObject.getValue() == null)
+                    continue;
+
+                WrappedDataWatcher.WrappedDataWatcherObject obj = ReflectionManager
+                        .createDataWatcherObject(watchableObject.getIndex(), watchableObject.getValue());
+
+                newWatcher.setObject(obj, watchableObject.getValue());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return newWatcher;
+    }
+
+    public static byte getPitch(DisguiseType disguiseType, EntityType entityType, byte value) {
+        return getPitch(disguiseType, getPitch(DisguiseType.getType(entityType), value));
+    }
+
+    public static byte getPitch(DisguiseType disguiseType, DisguiseType entityType, byte value) {
+        return getPitch(disguiseType, getPitch(entityType, value));
+    }
+
+    public static byte getPitch(DisguiseType disguiseType, byte value) {
+        if (disguiseType.isMisc()) {
+            return (byte) -value;
+        }
+
+        switch (disguiseType) {
+            case PHANTOM:
+                return (byte) -value;
+            default:
+                return value;
+        }
+    }
+
+    public static byte getYaw(DisguiseType disguiseType, EntityType entityType, byte value) {
+        return getYaw(disguiseType, getYaw(DisguiseType.getType(entityType), value));
+    }
+
+    public static byte getYaw(DisguiseType disguiseType, DisguiseType entityType, byte value) {
+        return getYaw(disguiseType, getYaw(entityType, value));
+    }
+
+    /**
+     * Add the yaw for the disguises
+     */
+    public static byte getYaw(DisguiseType disguiseType, byte value) {
+        switch (disguiseType) {
+            case MINECART:
+            case MINECART_CHEST:
+            case MINECART_COMMAND:
+            case MINECART_FURNACE:
+            case MINECART_HOPPER:
+            case MINECART_MOB_SPAWNER:
+            case MINECART_TNT:
+                return (byte) (value + 64);
+            case BOAT:
+            case ENDER_DRAGON:
+            case WITHER_SKULL:
+                return (byte) (value - 128);
+            case ARROW:
+            case TIPPED_ARROW:
+            case SPECTRAL_ARROW:
+                return (byte) -value;
+            case PAINTING:
+            case ITEM_FRAME:
+                return (byte) -(value + 128);
+            default:
+                if (disguiseType.isMisc() && disguiseType != DisguiseType.ARMOR_STAND) {
+                    return (byte) (value - 64);
+                }
+
+                return value;
+        }
+    }
+
+    /**
+     * Get the Y level to add to the disguise for realism.
+     */
+    public static double getYModifier(Entity entity, Disguise disguise) {
+        double yMod = 0;
+
+        if ((disguise.getType() != DisguiseType.PLAYER || !((PlayerWatcher) disguise.getWatcher()).isSleeping()) &&
+                entity.getType() == EntityType.DROPPED_ITEM) {
+            yMod -= 0.13;
+        }
+
+        switch (disguise.getType()) {
+            case BAT:
+                if (entity instanceof LivingEntity)
+                    return yMod + ((LivingEntity) entity).getEyeHeight();
+            case MINECART:
+            case MINECART_COMMAND:
+            case MINECART_CHEST:
+            case MINECART_FURNACE:
+            case MINECART_HOPPER:
+            case MINECART_MOB_SPAWNER:
+            case MINECART_TNT:
+                switch (entity.getType()) {
+                    case MINECART:
+                    case MINECART_CHEST:
+                    case MINECART_FURNACE:
+                    case MINECART_HOPPER:
+                    case MINECART_MOB_SPAWNER:
+                    case MINECART_TNT:
+                        return yMod;
+                    default:
+                        return yMod + 0.4;
+                }
+            case TIPPED_ARROW:
+            case SPECTRAL_ARROW:
+            case BOAT:
+            case EGG:
+            case ENDER_PEARL:
+            case ENDER_SIGNAL:
+            case FIREWORK:
+            case PAINTING:
+            case SMALL_FIREBALL:
+            case SNOWBALL:
+            case SPLASH_POTION:
+            case THROWN_EXP_BOTTLE:
+            case WITHER_SKULL:
+                return yMod + 0.7;
+            case PLAYER:
+                if (DisguiseConfig.isBedPacketsEnabled() && ((PlayerWatcher) disguise.getWatcher()).isSleeping()) {
+                    return yMod + 0.35;
+                }
+
+                break;
+            case DROPPED_ITEM:
+                return yMod + 0.13;
+            default:
+                break;
+        }
+        return yMod;
     }
 }

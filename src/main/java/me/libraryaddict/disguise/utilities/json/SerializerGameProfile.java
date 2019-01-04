@@ -5,7 +5,6 @@ import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -20,7 +19,7 @@ public class SerializerGameProfile implements JsonSerializer<WrappedGameProfile>
 
     @Override
     public WrappedGameProfile deserialize(JsonElement json, Type typeOfT,
-            JsonDeserializationContext context) throws JsonParseException {
+                                          JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
 
         if (obj.has("id") && !obj.get("id").getAsString().contains("-")) {

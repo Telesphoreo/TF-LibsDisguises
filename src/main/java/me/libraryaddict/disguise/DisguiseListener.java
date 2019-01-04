@@ -14,12 +14,12 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.TargetedDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsMsg;
 import me.libraryaddict.disguise.utilities.UpdateChecker;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -149,8 +149,7 @@ public class DisguiseListener implements Listener {
                             }
                         }
                     });
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     DisguiseUtilities.getLogger()
                             .warning(String.format("Failed to check for update: %s", ex.getMessage()));
                 }
@@ -238,8 +237,7 @@ public class DisguiseListener implements Listener {
                     }
                 }
             }
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -383,8 +381,7 @@ public class DisguiseListener implements Listener {
                                         WrappedChatComponent.fromText(disguise.getGameProfile().getName()))));
 
                         ProtocolLibrary.getProtocolManager().sendServerPacket(p, addTab);
-                    }
-                    catch (InvocationTargetException e) {
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
@@ -587,13 +584,11 @@ public class DisguiseListener implements Listener {
             try {
                 DisguiseParser.callMethods(p, disguise, perms, disguisePerm, Arrays.asList(options), options);
                 p.sendMessage(LibsMsg.LISTENER_MODIFIED_DISG.get());
-            }
-            catch (DisguiseParseException ex) {
+            } catch (DisguiseParseException ex) {
                 if (ex.getMessage() != null) {
                     p.sendMessage(ex.getMessage());
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -658,8 +653,7 @@ public class DisguiseListener implements Listener {
 
                 try {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 

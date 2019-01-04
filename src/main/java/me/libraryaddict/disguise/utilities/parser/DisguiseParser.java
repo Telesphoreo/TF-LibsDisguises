@@ -3,9 +3,9 @@ package me.libraryaddict.disguise.utilities.parser;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsMsg;
-import me.libraryaddict.disguise.utilities.TranslateType;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
+import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 
 public class DisguiseParser {
     private static void doCheck(CommandSender sender, DisguisePermissions permissions, DisguisePerm disguisePerm,
-            Collection<String> usedOptions) throws DisguiseParseException {
+                                Collection<String> usedOptions) throws DisguiseParseException {
 
         if (!permissions.isAllowedDisguise(disguisePerm, usedOptions)) {
             throw new DisguiseParseException(LibsMsg.D_PARSE_NOPERM,
@@ -29,7 +29,7 @@ public class DisguiseParser {
     }
 
     private static HashMap<String, Boolean> getDisguiseOptions(CommandSender sender, String permNode,
-            DisguisePerm type) {
+                                                               DisguisePerm type) {
         switch (type.getType()) {
             case PLAYER:
             case FALLING_BLOCK:
@@ -104,8 +104,7 @@ public class DisguiseParser {
         try {
             Float.parseFloat(string);
             return true;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -114,8 +113,7 @@ public class DisguiseParser {
         try {
             Integer.parseInt(string);
             return true;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -127,7 +125,7 @@ public class DisguiseParser {
      * disguise has been feed a proper disguisetype.
      */
     public static Disguise parseDisguise(CommandSender sender, String permNode, String[] args,
-            DisguisePermissions permissions) throws DisguiseParseException, IllegalAccessException,
+                                         DisguisePermissions permissions) throws DisguiseParseException, IllegalAccessException,
             InvocationTargetException {
         if (sender instanceof Player) {
             DisguiseUtilities.setCommandsUsed();
@@ -330,8 +328,8 @@ public class DisguiseParser {
     }
 
     public static void callMethods(CommandSender sender, Disguise disguise, DisguisePermissions disguisePermission,
-            DisguisePerm disguisePerm, Collection<String> usedOptions,
-            String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                                   DisguisePerm disguisePerm, Collection<String> usedOptions,
+                                   String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
             DisguiseParseException {
         Method[] methods = ParamInfoManager.getDisguiseWatcherMethods(disguise.getWatcher().getClass());
         List<String> list = new ArrayList<>(Arrays.asList(args));
@@ -376,11 +374,9 @@ public class DisguiseParser {
                     methodToUse = method;
                     // We've found a method which will accept a valid value, break
                     break;
-                }
-                catch (DisguiseParseException ex) {
+                } catch (DisguiseParseException ex) {
                     parseException = ex;
-                }
-                catch (Exception ignored) {
+                } catch (Exception ignored) {
                     parseException = new DisguiseParseException(LibsMsg.PARSE_EXPECTED_RECEIVED,
                             paramInfo.getDescriptiveName(), list.isEmpty() ? null : list.get(0),
                             TranslateType.DISGUISE_OPTIONS.reverseGet(method.getName()));

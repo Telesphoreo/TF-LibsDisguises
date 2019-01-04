@@ -111,8 +111,7 @@ public class ParamInfoTypes {
             }
 
             return map;
-        }
-        catch (ClassNotFoundException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
@@ -136,8 +135,7 @@ public class ParamInfoTypes {
                 }
 
                 list.add(material);
-            }
-            catch (NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 e.printStackTrace();
             }
         }

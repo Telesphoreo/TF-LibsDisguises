@@ -84,8 +84,7 @@ public abstract class AbstractHorseWatcher extends AgeableWatcher {
 
         if (flag) {
             setData(MetaIndex.HORSE_META, (byte) (j | i));
-        }
-        else {
+        } else {
             setData(MetaIndex.HORSE_META, (byte) (j & ~i));
         }
 

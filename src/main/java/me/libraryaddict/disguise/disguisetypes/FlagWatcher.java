@@ -13,7 +13,7 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.ReflectionManager;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -60,8 +60,7 @@ public class FlagWatcher {
 
         try {
             cloned = getClass().getConstructor(Disguise.class).newInstance(getDisguise());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             cloned = new FlagWatcher(getDisguise());
         }
@@ -176,8 +175,7 @@ public class FlagWatcher {
                                         try {
                                             DisguiseUtilities.sendSelfDisguise((Player) getDisguise().getEntity(),
                                                     getDisguise());
-                                        }
-                                        catch (Exception ex) {
+                                        } catch (Exception ex) {
                                             ex.printStackTrace();
                                         }
                                     }, 2);
@@ -372,8 +370,7 @@ public class FlagWatcher {
                     } else {
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
                     }
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
@@ -514,8 +511,7 @@ public class FlagWatcher {
         for (Player player : DisguiseUtilities.getPerverts(getDisguise())) {
             try {
                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
-            }
-            catch (InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
         }

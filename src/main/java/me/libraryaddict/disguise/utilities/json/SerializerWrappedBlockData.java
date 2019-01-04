@@ -1,9 +1,7 @@
 package me.libraryaddict.disguise.utilities.json;
 
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.google.gson.*;
-import com.mojang.authlib.GameProfile;
 import org.bukkit.Material;
 
 import java.lang.reflect.Type;
@@ -23,7 +21,7 @@ public class SerializerWrappedBlockData implements JsonSerializer<WrappedBlockDa
 
     @Override
     public WrappedBlockData deserialize(JsonElement json, Type typeOfT,
-            JsonDeserializationContext context) throws JsonParseException {
+                                        JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
 
         return WrappedBlockData.createData(Material.valueOf(obj.get("type").getAsString()), obj.get("data").getAsInt());

@@ -1,14 +1,5 @@
 package me.libraryaddict.disguise.utilities.packetlisteners;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -17,11 +8,18 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
-
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.ReflectionManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PacketListenerInventory extends PacketAdapter {
     private LibsDisguises libsDisguises;
@@ -73,14 +71,12 @@ public class PacketListenerInventory extends PacketAdapter {
 
                             try {
                                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                            }
-                            catch (InvocationTargetException e) {
+                            } catch (InvocationTargetException e) {
                                 e.printStackTrace();
                             }
                         }
                     }
-                }
-                else if (slot >= 36 && slot <= 45) {
+                } else if (slot >= 36 && slot <= 45) {
                     if (disguise.isHidingHeldItemFromSelf()) {
                         int currentSlot = player.getInventory().getHeldItemSlot();
 
@@ -97,8 +93,7 @@ public class PacketListenerInventory extends PacketAdapter {
 
                                 try {
                                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                                }
-                                catch (InvocationTargetException e) {
+                                } catch (InvocationTargetException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -126,8 +121,7 @@ public class PacketListenerInventory extends PacketAdapter {
 
                         try {
                             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                        }
-                        catch (InvocationTargetException e) {
+                        } catch (InvocationTargetException e) {
                             e.printStackTrace();
                         }
                     }
@@ -147,14 +141,12 @@ public class PacketListenerInventory extends PacketAdapter {
 
                         try {
                             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                        }
-                        catch (InvocationTargetException e) {
+                        } catch (InvocationTargetException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-            }
-            else if (event.getPacketType() == PacketType.Play.Client.WINDOW_CLICK) {
+            } else if (event.getPacketType() == PacketType.Play.Client.WINDOW_CLICK) {
                 int slot = event.getPacket().getIntegers().read(1);
 
                 org.bukkit.inventory.ItemStack clickedItem;
@@ -174,8 +166,7 @@ public class PacketListenerInventory extends PacketAdapter {
                     }
 
                     return;
-                }
-                else {
+                } else {
                     // If its not a player inventory click
                     // Shift clicking is exempted for the item in hand..
                     if (event.getPacket().getIntegers().read(0) != 0) {
@@ -199,14 +190,12 @@ public class PacketListenerInventory extends PacketAdapter {
 
                             try {
                                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                            }
-                            catch (InvocationTargetException e) {
+                            } catch (InvocationTargetException e) {
                                 e.printStackTrace();
                             }
                         }
                         // Else if its a hotbar slot
-                    }
-                    else if (slot >= 36 && slot <= 45) {
+                    } else if (slot >= 36 && slot <= 45) {
                         if (disguise.isHidingHeldItemFromSelf()) {
                             int currentSlot = player.getInventory().getHeldItemSlot();
 
@@ -221,8 +210,7 @@ public class PacketListenerInventory extends PacketAdapter {
 
                                 try {
                                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet, false);
-                                }
-                                catch (InvocationTargetException e) {
+                                } catch (InvocationTargetException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -280,8 +268,7 @@ public class PacketListenerInventory extends PacketAdapter {
                     }
                 }
                 // Else if its a hotbar slot
-            }
-            else if (slot >= 36 && slot <= 45) {
+            } else if (slot >= 36 && slot <= 45) {
                 if (disguise.isHidingHeldItemFromSelf()) {
                     int currentSlot = player.getInventory().getHeldItemSlot();
 
@@ -297,8 +284,7 @@ public class PacketListenerInventory extends PacketAdapter {
                     }
                 }
             }
-        }
-        else if (event.getPacketType() == Server.WINDOW_ITEMS) {
+        } else if (event.getPacketType() == Server.WINDOW_ITEMS) {
             event.setPacket(event.getPacket().shallowClone());
 
             StructureModifier<List<ItemStack>> mods = event.getPacket().getItemListModifier();
@@ -317,8 +303,7 @@ public class PacketListenerInventory extends PacketAdapter {
                         }
                     }
                     // Else if its a hotbar slot
-                }
-                else if (slot >= 36 && slot <= 45) {
+                } else if (slot >= 36 && slot <= 45) {
                     if (disguise.isHidingHeldItemFromSelf()) {
                         int currentSlot = player.getInventory().getHeldItemSlot();
 

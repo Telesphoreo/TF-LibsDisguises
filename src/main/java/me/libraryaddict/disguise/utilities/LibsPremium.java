@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities;
 
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -56,12 +57,10 @@ public class LibsPremium {
                                 "You have a non-premium Lib's Disguises jar (" + file.getName() + " v" + pluginVersion +
                                         ") in the folder!");
                     }
-                }
-                catch (ClassNotFoundException ex) {
+                } catch (ClassNotFoundException ex) {
                     DisguiseUtilities.getLogger()
                             .warning("Found an unrecognized jar in the LibsDisguises folder (" + file.getName() + ")");
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     DisguiseUtilities.getLogger().warning("Error while trying to handle the file " + file.getName());
                     ex.printStackTrace();
                     // Don't print off errors

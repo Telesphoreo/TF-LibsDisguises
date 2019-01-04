@@ -1,11 +1,5 @@
 package me.libraryaddict.disguise.utilities.packetlisteners;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -14,12 +8,16 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
-
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.PacketsManager;
 import me.libraryaddict.disguise.utilities.PacketsManager.LibsPackets;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 public class PacketListenerMain extends PacketAdapter {
     public PacketListenerMain(LibsDisguises plugin, ArrayList<PacketType> packetsToListen) {
@@ -55,8 +53,7 @@ public class PacketListenerMain extends PacketAdapter {
 
         try {
             packets = PacketsManager.transformPacket(event.getPacket(), disguise, observer, entity);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             event.setCancelled(true);
             return;
@@ -76,8 +73,7 @@ public class PacketListenerMain extends PacketAdapter {
             }
 
             packets.sendDelayed(observer);
-        }
-        catch (InvocationTargetException ex) {
+        } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
 

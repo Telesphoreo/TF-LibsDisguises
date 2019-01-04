@@ -1,13 +1,12 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.MetaIndex;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.Material;
 import org.bukkit.entity.Horse.Color;
 import org.bukkit.entity.Horse.Style;
 import org.bukkit.inventory.ItemStack;
-
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.MetaIndex;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 
 public class HorseWatcher extends AbstractHorseWatcher {
     public HorseWatcher(Disguise disguise) {
@@ -25,14 +24,14 @@ public class HorseWatcher extends AbstractHorseWatcher {
         int horseValue = getHorseArmorAsInt();
 
         switch (horseValue) {
-        case 1:
-            return new ItemStack(Material.IRON_HORSE_ARMOR);
-        case 2:
-            return new ItemStack(Material.GOLDEN_HORSE_ARMOR);
-        case 3:
-            return new ItemStack(Material.DIAMOND_HORSE_ARMOR);
-        default:
-            break;
+            case 1:
+                return new ItemStack(Material.IRON_HORSE_ARMOR);
+            case 2:
+                return new ItemStack(Material.GOLDEN_HORSE_ARMOR);
+            case 3:
+                return new ItemStack(Material.DIAMOND_HORSE_ARMOR);
+            default:
+                break;
         }
 
         return null;
@@ -69,11 +68,9 @@ public class HorseWatcher extends AbstractHorseWatcher {
 
             if (mat == Material.IRON_HORSE_ARMOR) {
                 value = 1;
-            }
-            else if (mat == Material.GOLDEN_HORSE_ARMOR) {
+            } else if (mat == Material.GOLDEN_HORSE_ARMOR) {
                 value = 2;
-            }
-            else if (mat == Material.DIAMOND_HORSE_ARMOR) {
+            } else if (mat == Material.DIAMOND_HORSE_ARMOR) {
                 value = 3;
             }
         }

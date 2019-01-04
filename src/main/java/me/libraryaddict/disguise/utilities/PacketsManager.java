@@ -99,8 +99,7 @@ public class PacketsManager {
                             for (PacketContainer packet : entry.getValue()) {
                                 ProtocolLibrary.getProtocolManager().sendServerPacket(observer, packet, false);
                             }
-                        }
-                        catch (InvocationTargetException e) {
+                        } catch (InvocationTargetException e) {
                             e.printStackTrace();
                         }
 
@@ -157,7 +156,7 @@ public class PacketsManager {
      * Construct the packets I need to spawn in the disguise
      */
     private static LibsPackets constructSpawnPackets(final Player observer, LibsPackets packets,
-            Entity disguisedEntity) {
+                                                     Entity disguisedEntity) {
         Disguise disguise = packets.getDisguise();
 
         if (disguise.getEntity() == null) {
@@ -519,8 +518,7 @@ public class PacketsManager {
 
                 newWatcher.setObject(obj, watchableObject.getValue());
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -835,7 +833,7 @@ public class PacketsManager {
      * transformed
      */
     public static LibsPackets transformPacket(PacketContainer sentPacket, Disguise disguise, Player observer,
-            Entity entity) {
+                                              Entity entity) {
         LibsPackets packets = new LibsPackets(disguise);
 
         try {
@@ -1144,8 +1142,7 @@ public class PacketsManager {
             } else {
                 packets.setUnhandled();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

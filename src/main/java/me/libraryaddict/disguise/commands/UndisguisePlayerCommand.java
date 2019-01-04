@@ -2,7 +2,7 @@ package me.libraryaddict.disguise.commands;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.utilities.LibsMsg;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -62,8 +62,7 @@ public class UndisguisePlayerCommand implements CommandExecutor, TabCompleter {
                         if (args[0].contains("-")) {
                             try {
                                 p = Bukkit.getEntity(UUID.fromString(args[0]));
-                            }
-                            catch (Exception ignored) {
+                            } catch (Exception ignored) {
                             }
                         }
                     }

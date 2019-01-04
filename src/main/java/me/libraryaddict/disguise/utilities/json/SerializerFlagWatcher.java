@@ -19,7 +19,7 @@ public class SerializerFlagWatcher implements JsonDeserializer<FlagWatcher>, Jso
 
     @Override
     public FlagWatcher deserialize(JsonElement json, Type typeOfT,
-            JsonDeserializationContext context) throws JsonParseException {
+                                   JsonDeserializationContext context) throws JsonParseException {
         try {
             FlagWatcher watcher = context.deserialize(json,
                     Class.forName(((JsonObject) json).get("flagType").getAsString()));
@@ -30,8 +30,7 @@ public class SerializerFlagWatcher implements JsonDeserializer<FlagWatcher>, Jso
             correct(watcher, entity.getWatcherClass(), "backupEntityValues");
 
             return watcher;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -39,7 +38,7 @@ public class SerializerFlagWatcher implements JsonDeserializer<FlagWatcher>, Jso
     }
 
     private void correct(FlagWatcher watcher, Class<? extends FlagWatcher> flagWatcher,
-            String name) throws NoSuchFieldException, IllegalAccessException {
+                         String name) throws NoSuchFieldException, IllegalAccessException {
         Field field = FlagWatcher.class.getDeclaredField(name);
         field.setAccessible(true);
         HashMap<Integer, Object> map = (HashMap<Integer, Object>) field.get(watcher);
@@ -69,8 +68,7 @@ public class SerializerFlagWatcher implements JsonDeserializer<FlagWatcher>, Jso
     public FlagWatcher createInstance(Type type) {
         try {
             return (FlagWatcher) type.getClass().getConstructor(Disguise.class).newInstance(null);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -88,8 +86,7 @@ public class SerializerFlagWatcher implements JsonDeserializer<FlagWatcher>, Jso
             method.setAccessible(true);
             Disguise disguise = (Disguise) method.invoke(src);
             obj.addProperty("entityType", disguise.getType().name());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 

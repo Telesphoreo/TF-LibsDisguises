@@ -1,9 +1,7 @@
 package me.libraryaddict.disguise.commands;
 
 import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.utilities.LibsMsg;
-import me.libraryaddict.disguise.utilities.TranslateType;
-import org.bukkit.ChatColor;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,8 +19,7 @@ public class UndisguiseRadiusCommand implements CommandExecutor {
         try {
             Integer.parseInt(string);
             return true;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return false;
         }
     }

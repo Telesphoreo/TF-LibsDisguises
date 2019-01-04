@@ -13,7 +13,7 @@ public class SerializerChatComponent implements JsonDeserializer<WrappedChatComp
 
     @Override
     public WrappedChatComponent deserialize(JsonElement json, Type typeOfT,
-            JsonDeserializationContext context) throws JsonParseException {
+                                            JsonDeserializationContext context) throws JsonParseException {
         if (json.isJsonPrimitive()) {
             return WrappedChatComponent.fromJson(json.getAsString());
         }

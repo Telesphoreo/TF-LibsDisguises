@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public class ParamInfoItemStackArray extends ParamInfoItemStack {
     public ParamInfoItemStackArray(Class paramClass, String name, String valueType, String description,
-            Enum[] possibleValues) {
+                                   Enum[] possibleValues) {
         super(paramClass, name, valueType, description, possibleValues);
     }
 

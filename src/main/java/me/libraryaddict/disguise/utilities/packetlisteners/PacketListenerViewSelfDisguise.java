@@ -86,8 +86,7 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
 
                 try {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(observer, newPacket, false);
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
@@ -147,8 +146,7 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
 
                 try {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(observer, metaPacket);
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             } else if (event.getPacketType() == Server.ANIMATION) {
@@ -168,8 +166,7 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
                     event.setCancelled(true);
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             event.setCancelled(true);
             ex.printStackTrace();
         }

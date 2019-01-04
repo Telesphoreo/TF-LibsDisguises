@@ -50,6 +50,7 @@ public enum LibsMsg {
     DISG_PLAYER_AS_DISG_FAIL(ChatColor.RED + "Failed to disguise %s as a %s!"),
     DISGUISED(ChatColor.RED + "Now disguised as a %s"),
     DISRADIUS(ChatColor.RED + "Successfully disguised %s entities!"),
+    DISGUISE_FORBIDDEN(ChatColor.RED + "That disguise is forbidden!"),
     DISRADIUS_FAIL(ChatColor.RED + "Couldn't find any entities to disguise!"),
     DMODENT_HELP1(ChatColor.DARK_GREEN + "Choose the options for a disguise then right click a entity to modify it!"),
     DMODIFY_HELP1(ChatColor.DARK_GREEN + "Modify your own disguise as you wear it!"),

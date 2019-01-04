@@ -44,7 +44,7 @@ public class DisguisePermissions {
         private boolean wildcardCommand;
 
         public ParsedPermission(DisguisePerm[] disguisePerm, HashMap<String, Boolean> options, byte inheritance,
-                boolean wildcardCommand) {
+                                boolean wildcardCommand) {
             this.disguisePerm = new Vector<>(Arrays.asList(disguisePerm));
             this.options = options;
             this.inheritance = inheritance;

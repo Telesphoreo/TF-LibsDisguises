@@ -590,8 +590,7 @@ public class MetaIndex<Y> {
                         index.getFlagWatcher().getSimpleName() + " " + field.getName() + " " + index.getIndex() + " " +
                                 index.getDefault().getClass().getSimpleName());
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -679,8 +678,7 @@ public class MetaIndex<Y> {
 
                 return field.getName();
             }
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
 
@@ -739,8 +737,7 @@ public class MetaIndex<Y> {
                 _values = Arrays.copyOf(_values, _values.length + 1);
                 _values[_values.length - 1] = index;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -755,10 +752,8 @@ public class MetaIndex<Y> {
 
             field.set(null, metaIndex);
             return true;
-        }
-        catch (NoSuchFieldException ignored) {
-        }
-        catch (Exception ex) {
+        } catch (NoSuchFieldException ignored) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 

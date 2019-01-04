@@ -6,9 +6,9 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsMsg;
 import me.libraryaddict.disguise.utilities.parser.*;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -42,15 +42,13 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
             disguise = DisguiseParser
                     .parseDisguise(sender, getPermNode(), DisguiseUtilities.split(StringUtils.join(args, " ")),
                             getPermissions(sender));
-        }
-        catch (DisguiseParseException ex) {
+        } catch (DisguiseParseException ex) {
             if (ex.getMessage() != null) {
                 sender.sendMessage(ex.getMessage());
             }
 
             return true;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             return true;
         }
@@ -74,23 +72,19 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
                 disguise.setViewSelfDisguise(!disguise.isSelfDisguiseVisible());
         }
 
-        if (DisguiseBlocker.enabled)
-        {
-            if (DisguiseBlocker.isAllowed(disguise, ((Player)sender).getPlayer()))
-            {
+        // TFM Start
+        if (DisguiseBlocker.enabled) {
+            if (DisguiseBlocker.isAllowed(disguise, ((Player) sender).getPlayer())) {
                 disguise.startDisguise();
-            }
-            else
-            {
-                sender.sendMessage(LibsMsg.FORBIDDEN_DISGUISE.get());
+            } else {
+                sender.sendMessage(LibsMsg.DISGUISE_FORBIDDEN.get());
                 return true;
             }
-        }
-        else
-        {
+        } else {
             sender.sendMessage(LibsMsg.DISGUISES_DISABLED.get());
             return true;
         }
+        // TFM End
 
         if (disguise.isDisguiseInUse()) {
             sender.sendMessage(LibsMsg.DISGUISED.get(disguise.getType().toReadable()));

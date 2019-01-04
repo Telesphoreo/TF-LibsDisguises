@@ -64,8 +64,7 @@ public enum TranslateType {
                 writer.close();
                 writer = null;
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -118,8 +117,7 @@ public enum TranslateType {
                     translated.put(newKey, ChatColor.translateAlternateColorCodes('&', value));
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -171,8 +169,7 @@ public enum TranslateType {
 
             writer.write("\n" + (comment != null ? "# " + comment + "\n" : "") + "\"" + message + "\": \"" + message +
                     "\"\n");
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

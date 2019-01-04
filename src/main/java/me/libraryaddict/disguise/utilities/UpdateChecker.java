@@ -10,7 +10,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class UpdateChecker {
     private final String resourceID;
@@ -99,8 +98,7 @@ public class UpdateChecker {
                     return version;
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Failed to check for a update on spigot.");
         }
 
@@ -158,8 +156,7 @@ public class UpdateChecker {
             }
 
             return jsonObject;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Failed to check for a snapshot update on jenkins.");
         }
 

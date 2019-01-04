@@ -3,7 +3,6 @@ package me.libraryaddict.disguise.utilities.json;
 import com.google.gson.*;
 import me.libraryaddict.disguise.disguisetypes.*;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -14,7 +13,7 @@ public class SerializerDisguise implements JsonDeserializer<Disguise>, JsonSeria
 
     @Override
     public Disguise deserialize(JsonElement json, Type typeOfT,
-            JsonDeserializationContext context) throws JsonParseException {
+                                JsonDeserializationContext context) throws JsonParseException {
         JsonObject obj = (JsonObject) json;
         DisguiseType type = DisguiseType.valueOf(obj.get("disguiseType").getAsString());
         TargetedDisguise disg;
@@ -32,8 +31,7 @@ public class SerializerDisguise implements JsonDeserializer<Disguise>, JsonSeria
             Method method = FlagWatcher.class.getDeclaredMethod("setDisguise", TargetedDisguise.class);
             method.setAccessible(true);
             method.invoke(disg.getWatcher(), disg);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

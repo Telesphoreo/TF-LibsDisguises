@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities;
 
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.Sound;
 
 import java.util.Arrays;
@@ -236,8 +237,7 @@ public enum DisguiseSound {
     public static DisguiseSound getType(String name) {
         try {
             return valueOf(name);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }

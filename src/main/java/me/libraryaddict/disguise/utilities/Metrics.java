@@ -94,8 +94,7 @@ public class Metrics {
                             "Check out https://bStats.org/ to learn more :)").copyDefaults(true);
             try {
                 config.save(configFile);
-            }
-            catch (IOException ignored) {
+            } catch (IOException ignored) {
             }
         }
 
@@ -110,8 +109,7 @@ public class Metrics {
                     service.getField("B_STATS_VERSION"); // Our identifier :)
                     found = true; // We aren't the first
                     break;
-                }
-                catch (NoSuchFieldException ignored) {
+                } catch (NoSuchFieldException ignored) {
                 }
             }
             // Register our service
@@ -238,15 +236,13 @@ public class Metrics {
         for (Class<?> service : Bukkit.getServicesManager().getKnownServices()) {
             try {
                 service.getField("B_STATS_VERSION"); // Our identifier :)
-            }
-            catch (NoSuchFieldException ignored) {
+            } catch (NoSuchFieldException ignored) {
                 continue; // Continue "searching"
             }
             // Found one!
             try {
                 pluginData.add(service.getMethod("getPluginData").invoke(Bukkit.getServicesManager().load(service)));
-            }
-            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
             }
         }
 
@@ -259,8 +255,7 @@ public class Metrics {
                 try {
                     // Send the data
                     sendData(data);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     // Something went wrong! :(
                     if (logFailedRequests) {
                         plugin.getLogger()
@@ -356,8 +351,7 @@ public class Metrics {
                     return null;
                 }
                 chart.put("data", data);
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 if (logFailedRequests) {
                     Bukkit.getLogger().log(Level.WARNING, "Failed to get data for custom chart with id " + chartId, t);
                 }

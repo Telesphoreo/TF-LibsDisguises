@@ -9,7 +9,7 @@ import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.ReflectionManager;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -63,8 +63,7 @@ public abstract class TargetedDisguise extends Disguise {
 
                             ProtocolLibrary.getProtocolManager().sendServerPacket(player, deleteTab);
                         }
-                    }
-                    catch (InvocationTargetException e) {
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
@@ -126,8 +125,7 @@ public abstract class TargetedDisguise extends Disguise {
 
                             ProtocolLibrary.getProtocolManager().sendServerPacket(player, deleteTab);
                         }
-                    }
-                    catch (InvocationTargetException e) {
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }

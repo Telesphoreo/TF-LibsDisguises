@@ -11,8 +11,8 @@ import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsProfileLookup;
-import me.libraryaddict.disguise.utilities.ReflectionManager;
+import me.libraryaddict.disguise.utilities.reflection.LibsProfileLookup;
+import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -257,8 +257,7 @@ public class PlayerDisguise extends TargetedDisguise {
         if (newSkin != null && newSkin.length() > 50) {
             try {
                 return setSkin(DisguiseUtilities.getGson().fromJson(newSkin, WrappedGameProfile.class));
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw new IllegalArgumentException(String.format(
                         "The skin %s is too long to be a playername, but cannot be parsed to a GameProfile!", newSkin));
             }
@@ -317,8 +316,7 @@ public class PlayerDisguise extends TargetedDisguise {
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, deleteTab);
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, addTab);
                     }
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }

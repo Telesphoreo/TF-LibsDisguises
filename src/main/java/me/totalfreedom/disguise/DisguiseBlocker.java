@@ -1,17 +1,17 @@
 package me.totalfreedom.disguise;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.base.Function;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import com.google.common.base.Function;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class DisguiseBlocker {
     private static Logger logger = LibsDisguises.getInstance().getLogger();
@@ -32,11 +32,9 @@ public class DisguiseBlocker {
             DisguiseType.PHANTOM
     );
 
-    public static Plugin getTFM()
-    {
+    public static Plugin getTFM() {
         final Plugin tfm = Bukkit.getPluginManager().getPlugin("TotalFreedomMod");
-        if (tfm == null)
-        {
+        if (tfm == null) {
             logger.warning("Could not resolve plugin: TotalFreedomMod");
         }
 
@@ -44,36 +42,42 @@ public class DisguiseBlocker {
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    private static boolean isAdmin(Player player)
-    {
-
-        if (adminProvider == null)
-        {
+    public static boolean isAdmin(Player player) {
+        if (adminProvider == null) {
             final Plugin tfm = getTFM();
-            if (tfm == null)
-            {
+            if (tfm == null) {
                 return false;
             }
 
             Object provider = null;
-            for (RegisteredServiceProvider<?> serv : Bukkit.getServicesManager().getRegistrations(tfm))
-            {
-                if (Function.class.isAssignableFrom(serv.getService()))
-                {
+            for (RegisteredServiceProvider<?> serv : Bukkit.getServicesManager().getRegistrations(tfm)) {
+                if (Function.class.isAssignableFrom(serv.getService())) {
                     provider = serv.getProvider();
                 }
             }
 
-            if (provider == null)
-            {
+            if (provider == null) {
                 logger.warning("Could not obtain admin service provider!");
                 return false;
             }
 
-            adminProvider = (Function<Player, Boolean>)provider;
+            adminProvider = (Function<Player, Boolean>) provider;
         }
 
         return adminProvider.apply(player);
+    }
+
+    public static boolean isAllowed(Disguise disguise) {
+        return isAllowed(disguise.getType());
+
+    }
+
+    public static boolean isAllowed(DisguiseType type) {
+        if (forbiddenDisguises.contains(type)) {
+            return false;
+        }
+
+        return true;
     }
 
     public static boolean isAllowed(Disguise disguise, Player player) {

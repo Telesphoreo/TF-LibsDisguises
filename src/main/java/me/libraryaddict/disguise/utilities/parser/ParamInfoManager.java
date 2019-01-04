@@ -4,7 +4,6 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfoTypes;
 import org.bukkit.ChatColor;
@@ -107,8 +106,7 @@ public class ParamInfoManager {
                 "setHearSelfDisguise", "setHidePlayer"}) {
             try {
                 methods.add(Disguise.class.getMethod(methodName, boolean.class));
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
