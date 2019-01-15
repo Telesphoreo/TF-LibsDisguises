@@ -5,12 +5,12 @@ import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.parser.*;
-import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.reflection.ClassGetter;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.*;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -92,7 +92,8 @@ public class DisguiseRadiusCommand extends DisguiseBaseCommand implements TabCom
             if (starting == 0) {
                 try {
                     type = EntityType.valueOf(args[0].toUpperCase());
-                } catch (Exception ignored) {
+                }
+                catch (Exception ignored) {
                 }
 
                 if (type == null) {
@@ -136,13 +137,15 @@ public class DisguiseRadiusCommand extends DisguiseBaseCommand implements TabCom
             disguise = DisguiseParser
                     .parseDisguise(sender, getPermNode(), DisguiseUtilities.split(StringUtils.join(newArgs, " ")),
                             permissions);
-        } catch (DisguiseParseException ex) {
+        }
+        catch (DisguiseParseException ex) {
             if (ex.getMessage() != null) {
                 sender.sendMessage(ex.getMessage());
             }
 
             return true;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
             return true;
         }

@@ -53,7 +53,8 @@ public class PacketListenerMain extends PacketAdapter {
 
         try {
             packets = PacketsManager.getPacketsHandler().transformPacket(event.getPacket(), disguise, observer, entity);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
             event.setCancelled(true);
             return;
@@ -73,7 +74,8 @@ public class PacketListenerMain extends PacketAdapter {
             }
 
             packets.sendDelayed(observer);
-        } catch (InvocationTargetException ex) {
+        }
+        catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }

@@ -29,7 +29,7 @@ public class PacketHandlerEquipment implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         // Else if the disguise is updating equipment
 
         EquipmentSlot slot = ReflectionManager.createEquipmentSlot(packets.getPackets().get(0).getModifier().read(1));

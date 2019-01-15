@@ -237,7 +237,8 @@ public enum DisguiseSound {
     public static DisguiseSound getType(String name) {
         try {
             return valueOf(name);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             return null;
         }
     }

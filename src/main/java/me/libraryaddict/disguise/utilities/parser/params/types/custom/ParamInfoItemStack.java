@@ -1,7 +1,7 @@
 package me.libraryaddict.disguise.utilities.parser.params.types.custom;
 
-import me.libraryaddict.disguise.utilities.parser.params.types.ParamInfoEnum;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.params.types.ParamInfoEnum;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class ParamInfoItemStack extends ParamInfoEnum {
     public ParamInfoItemStack(Class paramClass, String name, String valueType, String description,
-                              Enum[] possibleValues) {
+            Enum[] possibleValues) {
         super(paramClass, name, valueType, description, possibleValues);
 
         setOtherValues("null", "glow");

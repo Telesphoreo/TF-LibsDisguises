@@ -3,9 +3,9 @@ package me.libraryaddict.disguise.commands;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.parser.*;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
-import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -72,12 +72,15 @@ public class DisguiseModifyPlayerCommand extends DisguiseBaseCommand implements 
         try {
             DisguiseParser.callMethods(sender, disguise, permissions, disguisePerm, new ArrayList<>(),
                     DisguiseUtilities.split(StringUtils.join(newArgs, " ")));
-        } catch (DisguiseParseException ex) {
+        }
+        catch (DisguiseParseException ex) {
             if (ex.getMessage() != null) {
                 sender.sendMessage(ex.getMessage());
             }
             return true;
-        } catch (Exception ex) {
+        }
+
+        catch (Exception ex) {
             ex.printStackTrace();
             return true;
         }

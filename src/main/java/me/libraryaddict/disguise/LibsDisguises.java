@@ -8,9 +8,7 @@ import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import me.libraryaddict.disguise.disguisetypes.watchers.*;
-import me.libraryaddict.disguise.utilities.DisguiseSound;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.LibsPremium;
+import me.libraryaddict.disguise.utilities.*;
 import me.libraryaddict.disguise.utilities.metrics.MetricsInitalizer;
 import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
@@ -211,7 +209,8 @@ public class LibsDisguises extends JavaPlugin {
                                         "Watcher");
                         break;
                 }
-            } catch (ClassNotFoundException ex) {
+            }
+            catch (ClassNotFoundException ex) {
                 // There is no explicit watcher for this entity.
                 Class entityClass = disguiseType.getEntityType().getEntityClass();
 
@@ -437,7 +436,8 @@ public class LibsDisguises extends JavaPlugin {
                 }
 
                 disguiseValues.setEntitySize(ReflectionManager.getSize(bukkitEntity));
-            } catch (SecurityException | IllegalArgumentException | IllegalAccessException | FieldAccessException ex) {
+            }
+            catch (SecurityException | IllegalArgumentException | IllegalAccessException | FieldAccessException ex) {
                 getLogger().severe("Uh oh! Trouble while making values for the disguise " + disguiseType.name() + "!");
                 getLogger().severe("Before reporting this error, " +
                         "please make sure you are using the latest version of LibsDisguises and ProtocolLib.");

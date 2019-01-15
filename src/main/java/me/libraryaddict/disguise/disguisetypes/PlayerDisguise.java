@@ -257,7 +257,8 @@ public class PlayerDisguise extends TargetedDisguise {
         if (newSkin != null && newSkin.length() > 50) {
             try {
                 return setSkin(DisguiseUtilities.getGson().fromJson(newSkin, WrappedGameProfile.class));
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 throw new IllegalArgumentException(String.format(
                         "The skin %s is too long to be a playername, but cannot be parsed to a GameProfile!", newSkin));
             }
@@ -316,7 +317,8 @@ public class PlayerDisguise extends TargetedDisguise {
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, deleteTab);
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, addTab);
                     }
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }

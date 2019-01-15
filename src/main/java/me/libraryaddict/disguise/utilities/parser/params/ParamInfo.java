@@ -1,7 +1,7 @@
 package me.libraryaddict.disguise.utilities.parser.params;
 
-import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +52,7 @@ public abstract class ParamInfo {
     }
 
     public ParamInfo(Class paramClass, String name, String descriptiveName, String description,
-                     Map<String, Object> possibleValues) {
+            Map<String, Object> possibleValues) {
         this(paramClass, name, descriptiveName, description);
 
         this.possibleValues = new HashMap<>();

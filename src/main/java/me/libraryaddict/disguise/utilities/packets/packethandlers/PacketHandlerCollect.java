@@ -22,7 +22,7 @@ public class PacketHandlerCollect implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         if (disguise.getType().isMisc()) {
             packets.clear();
         } else if (DisguiseConfig.isBedPacketsEnabled() && disguise.getType().isPlayer() &&

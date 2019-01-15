@@ -5,9 +5,9 @@ import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.parser.*;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
-import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -46,13 +46,15 @@ public class DisguiseEntityCommand extends DisguiseBaseCommand implements TabCom
             disguise = DisguiseParser
                     .parseDisguise(sender, getPermNode(), DisguiseUtilities.split(StringUtils.join(args, " ")),
                             getPermissions(sender));
-        } catch (DisguiseParseException ex) {
+        }
+        catch (DisguiseParseException ex) {
             if (ex.getMessage() != null) {
                 sender.sendMessage(ex.getMessage());
             }
 
             return true;
-        } catch (IllegalAccessException | InvocationTargetException ex) {
+        }
+        catch (IllegalAccessException | InvocationTargetException ex) {
             ex.printStackTrace();
             return true;
         }

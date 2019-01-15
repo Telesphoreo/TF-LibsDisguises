@@ -20,7 +20,7 @@ public class PacketHandlerVelocity implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         // If the disguise is a misc and the disguised is not the same type
         if (disguise.getType().isMisc() && DisguiseType.getType(entity) != disguise.getType()) {
             packets.clear();

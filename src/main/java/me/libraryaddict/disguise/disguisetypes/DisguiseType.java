@@ -215,7 +215,8 @@ public enum DisguiseType {
     public static DisguiseType getType(EntityType entityType) {
         try {
             return valueOf(entityType.name().toUpperCase());
-        } catch (Throwable ex) {
+        }
+        catch (Throwable ex) {
             return DisguiseType.UNKNOWN;
         }
     }

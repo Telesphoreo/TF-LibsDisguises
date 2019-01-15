@@ -88,7 +88,8 @@ public class PacketsHandler {
             }
 
             packets.setUnhandled();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 

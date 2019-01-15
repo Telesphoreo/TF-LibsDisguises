@@ -1,12 +1,12 @@
 package me.libraryaddict.disguise.commands;
 
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
+import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.parser.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
-import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -102,7 +102,8 @@ public class DisguiseHelpCommand extends DisguiseBaseCommand implements TabCompl
 
                         methods.add(methodColor + str);
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     ex.printStackTrace();
                 }
 

@@ -26,7 +26,7 @@ public class PacketHandlerMovement implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
 
         if (disguise.getType() == DisguiseType.RABBIT &&
                 (sentPacket.getType() == PacketType.Play.Server.REL_ENTITY_MOVE ||

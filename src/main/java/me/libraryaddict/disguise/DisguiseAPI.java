@@ -141,7 +141,8 @@ public class DisguiseAPI {
                                             }
                                         }
                                         watcherMethod.invoke(watcher, value);
-                                    } catch (Exception ex) {
+                                    }
+                                    catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
                                 }

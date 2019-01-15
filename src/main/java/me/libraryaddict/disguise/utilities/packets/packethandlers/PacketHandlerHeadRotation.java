@@ -23,7 +23,7 @@ public class PacketHandlerHeadRotation implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         if (disguise.getType().isPlayer() && entity.getType() != EntityType.PLAYER) {
             Location loc = entity.getLocation();
 

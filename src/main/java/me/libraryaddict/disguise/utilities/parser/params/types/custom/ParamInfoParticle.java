@@ -2,9 +2,9 @@ package me.libraryaddict.disguise.utilities.parser.params.types.custom;
 
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedParticle;
+import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.params.types.ParamInfoEnum;
-import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -21,7 +21,7 @@ public class ParamInfoParticle extends ParamInfoEnum {
     private Material[] materials;
 
     public ParamInfoParticle(Class paramClass, String name, String description, Enum[] possibleValues,
-                             Material[] materials) {
+            Material[] materials) {
         super(paramClass, name, description, possibleValues);
 
         this.materials = materials;

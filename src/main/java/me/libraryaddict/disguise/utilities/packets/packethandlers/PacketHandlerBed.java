@@ -19,7 +19,7 @@ public class PacketHandlerBed implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         // If the entity is going into a bed, stop everything but players from doing this
         if (!disguise.getType().isPlayer()) {
             packets.clear();

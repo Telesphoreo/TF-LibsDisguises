@@ -1,7 +1,7 @@
 package me.libraryaddict.disguise.utilities.parser.params.types.base;
 
-import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 
 import java.util.List;
 import java.util.Map;

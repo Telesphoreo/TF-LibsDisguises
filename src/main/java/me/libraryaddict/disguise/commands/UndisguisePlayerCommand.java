@@ -62,7 +62,8 @@ public class UndisguisePlayerCommand implements CommandExecutor, TabCompleter {
                         if (args[0].contains("-")) {
                             try {
                                 p = Bukkit.getEntity(UUID.fromString(args[0]));
-                            } catch (Exception ignored) {
+                            }
+                            catch (Exception ignored) {
                             }
                         }
                     }

@@ -79,7 +79,8 @@ public class LibsPackets {
                         for (PacketContainer packet : entry.getValue()) {
                             ProtocolLibrary.getProtocolManager().sendServerPacket(observer, packet, false);
                         }
-                    } catch (InvocationTargetException e) {
+                    }
+                    catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
 

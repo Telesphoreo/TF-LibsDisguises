@@ -26,7 +26,7 @@ public class PacketHandlerAttributes implements IPacketHandler {
 
     @Override
     public void handle(Disguise disguise, PacketContainer sentPacket, LibsPackets packets, Player observer,
-                       Entity entity) {
+            Entity entity) {
         if (disguise.isMiscDisguise()) {
             packets.clear();
         } else {

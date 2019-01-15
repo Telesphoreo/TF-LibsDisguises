@@ -106,7 +106,8 @@ public class PacketListenerSounds extends PacketAdapter {
                             } else {
                                 obj = null;
                             }
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -127,7 +128,8 @@ public class PacketListenerSounds extends PacketAdapter {
                                 hasInvun = (Boolean) ReflectionManager.getNmsMethod("Entity", "isInvulnerable", clazz)
                                         .invoke(nmsEntity, ReflectionManager.getNmsField(clazz, "GENERIC").get(null));
                             }
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex) {
                             ex.printStackTrace();
                         }
 
@@ -169,7 +171,8 @@ public class PacketListenerSounds extends PacketAdapter {
                                 mods.write(0, ReflectionManager.getNmsMethod(step.getClass(), "d").invoke(step));
                                 mods.write(1, ReflectionManager.getSoundCategory(disguise.getType()));
                             }
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex) {
                             ex.printStackTrace();
                         }
                         // There is no else statement. Because seriously. This should never be null. Unless
@@ -269,7 +272,8 @@ public class PacketListenerSounds extends PacketAdapter {
                         } else {
                             obj = null;
                         }
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -330,7 +334,8 @@ public class PacketListenerSounds extends PacketAdapter {
 
                             try {
                                 ProtocolLibrary.getProtocolManager().sendServerPacket(observer, packet, false);
-                            } catch (InvocationTargetException e) {
+                            }
+                            catch (InvocationTargetException e) {
                                 e.printStackTrace();
                             }
                         }

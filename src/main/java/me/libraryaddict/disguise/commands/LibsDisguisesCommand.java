@@ -2,8 +2,8 @@ package me.libraryaddict.disguise.commands;
 
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.LibsDisguises;
-import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
+import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.totalfreedom.disguise.DisguiseBlocker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

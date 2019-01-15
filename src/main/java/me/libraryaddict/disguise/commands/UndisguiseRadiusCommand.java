@@ -19,7 +19,8 @@ public class UndisguiseRadiusCommand implements CommandExecutor {
         try {
             Integer.parseInt(string);
             return true;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             return false;
         }
     }

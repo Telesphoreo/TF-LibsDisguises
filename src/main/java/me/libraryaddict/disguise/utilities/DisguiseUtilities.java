@@ -206,7 +206,8 @@ public class DisguiseUtilities {
 
                 savedDisguiseList.add(owningEntity);
             }
-        } catch (StackOverflowError | Exception e) {
+        }
+        catch (StackOverflowError | Exception e) {
             e.printStackTrace();
         }
     }
@@ -245,7 +246,8 @@ public class DisguiseUtilities {
             }
 
             return disguises;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             getLogger().severe("Malformed disguise for " + entityUUID);
             e.printStackTrace();
         }
@@ -349,7 +351,8 @@ public class DisguiseUtilities {
             writer.close();
 
             cachedNames.add(string.toLowerCase());
-        } catch (StackOverflowError | Exception e) {
+        }
+        catch (StackOverflowError | Exception e) {
             e.printStackTrace();
         }
     }
@@ -451,7 +454,8 @@ public class DisguiseUtilities {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, destroyPacket);
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -532,7 +536,7 @@ public class DisguiseUtilities {
     }
 
     public static PacketContainer[] getBedPackets(Location sleepingLocation, Location playerLocation,
-                                                  PlayerDisguise disguise) {
+            PlayerDisguise disguise) {
         int entity = disguise.getEntity().getEntityId();
         PlayerWatcher watcher = disguise.getWatcher();
 
@@ -631,7 +635,8 @@ public class DisguiseUtilities {
             reader.close();
 
             return gson.fromJson(cached, WrappedGameProfile.class);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -686,7 +691,8 @@ public class DisguiseUtilities {
                     }
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -742,12 +748,12 @@ public class DisguiseUtilities {
      * using schedulers. The runnable is run once the GameProfile has been successfully dealt with
      */
     public static WrappedGameProfile getProfileFromMojang(String playerName, LibsProfileLookup runnableIfCantReturn,
-                                                          boolean contactMojang) {
+            boolean contactMojang) {
         return getProfileFromMojang(playerName, (Object) runnableIfCantReturn, contactMojang);
     }
 
     private static WrappedGameProfile getProfileFromMojang(final String origName, final Object runnable,
-                                                           boolean contactMojang) {
+            boolean contactMojang) {
         final String playerName = origName.toLowerCase();
 
         if (DisguiseConfig.isSaveGameProfiles() && hasGameProfile(playerName)) {
@@ -796,7 +802,8 @@ public class DisguiseUtilities {
                                     }
                                 }
                             });
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             runnables.remove(playerName);
 
                             getLogger().severe("Error when fetching " + playerName + "'s uuid from mojang: " +
@@ -835,7 +842,7 @@ public class DisguiseUtilities {
      * using schedulers. The runnable is run once the GameProfile has been successfully dealt with
      */
     public static WrappedGameProfile getProfileFromMojang(String playerName, Runnable runnableIfCantReturn,
-                                                          boolean contactMojang) {
+            boolean contactMojang) {
         return getProfileFromMojang(playerName, (Object) runnableIfCantReturn, contactMojang);
     }
 
@@ -939,7 +946,8 @@ public class DisguiseUtilities {
             threadField.setAccessible(true);
 
             mainThread = (Thread) threadField.get(ReflectionManager.getMinecraftServer());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -994,7 +1002,8 @@ public class DisguiseUtilities {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                     try {
                         DisguiseUtilities.sendSelfDisguise((Player) disguise.getEntity(), disguise);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }, 2);
@@ -1028,14 +1037,16 @@ public class DisguiseUtilities {
                     Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                         try {
                             updatePlayer.invoke(entityTrackerEntry, p);
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex) {
                             ex.printStackTrace();
                         }
                     }, 2);
                     break;
                 }
             }
-        } catch (
+        }
+        catch (
 
                 Exception ex) {
             ex.printStackTrace();
@@ -1078,14 +1089,16 @@ public class DisguiseUtilities {
                             Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                                 try {
                                     updatePlayer.invoke(entityTrackerEntry, p);
-                                } catch (Exception ex) {
+                                }
+                                catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
                             }, 2);
                         }
                     }
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -1115,7 +1128,8 @@ public class DisguiseUtilities {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                     try {
                         DisguiseUtilities.sendSelfDisguise((Player) disguise.getEntity(), disguise);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }, 2);
@@ -1146,14 +1160,16 @@ public class DisguiseUtilities {
                         Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
                             try {
                                 updatePlayer.invoke(entityTrackerEntry, p);
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex) {
                                 ex.printStackTrace();
                             }
                         }, 2);
                     }
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -1201,7 +1217,8 @@ public class DisguiseUtilities {
 
         try {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1229,7 +1246,8 @@ public class DisguiseUtilities {
                             .get(entityTrackerEntry)).remove(ReflectionManager.getNmsEntity(player));
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1239,7 +1257,8 @@ public class DisguiseUtilities {
                     .createPacketConstructor(Server.ENTITY_METADATA, player.getEntityId(),
                             WrappedDataWatcher.getEntityWatcher(player), true)
                     .createPacket(player.getEntityId(), WrappedDataWatcher.getEntityWatcher(player), true));
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -1532,7 +1551,8 @@ public class DisguiseUtilities {
                 Field field = ReflectionManager.getNmsClass("EntityTrackerEntry").getDeclaredField("isMoving");
                 field.setAccessible(true);
                 isMoving = field.getBoolean(entityTrackerEntry);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -1604,7 +1624,8 @@ public class DisguiseUtilities {
                         manager.createPacketConstructor(Server.ENTITY_EFFECT, player.getEntityId(), mobEffect)
                                 .createPacket(player.getEntityId(), mobEffect));
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -1643,7 +1664,8 @@ public class DisguiseUtilities {
             }
 
             transformed.sendDelayed(player);
-        } catch (InvocationTargetException e) {
+        }
+        catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -1695,7 +1717,7 @@ public class DisguiseUtilities {
      * Create a new datawatcher but with the 'correct' values
      */
     public static WrappedDataWatcher createSanitizedDataWatcher(WrappedDataWatcher entityWatcher,
-                                                                FlagWatcher disguiseWatcher) {
+            FlagWatcher disguiseWatcher) {
         WrappedDataWatcher newWatcher = new WrappedDataWatcher();
 
         try {
@@ -1715,7 +1737,8 @@ public class DisguiseUtilities {
 
                 newWatcher.setObject(obj, watchableObject.getValue());
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 

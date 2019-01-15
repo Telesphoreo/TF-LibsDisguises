@@ -4,10 +4,10 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
-import me.libraryaddict.disguise.utilities.parser.*;
-import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
+import me.libraryaddict.disguise.utilities.parser.*;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -156,13 +156,15 @@ public class DisguiseModifyRadiusCommand extends DisguiseBaseCommand implements 
                 DisguiseParser.callMethods(sender, disguise, permissions, disguisePerm, new ArrayList<>(),
                         DisguiseUtilities.split(StringUtils.join(newArgs, " ")));
                 modifiedDisguises++;
-            } catch (DisguiseParseException ex) {
+            }
+            catch (DisguiseParseException ex) {
                 if (ex.getMessage() != null) {
                     sender.sendMessage(ex.getMessage());
                 }
 
                 return true;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
                 return true;
             }

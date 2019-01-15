@@ -89,7 +89,8 @@ public abstract class Disguise {
             try {
                 // Construct the FlagWatcher from the stored class
                 setWatcher(getType().getWatcherClass().getConstructor(Disguise.class).newInstance(this));
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -244,7 +245,8 @@ public abstract class Disguise {
                                     try {
                                         ProtocolLibrary.getProtocolManager()
                                                 .sendServerPacket((Player) getEntity(), selfLookPacket, false);
-                                    } catch (InvocationTargetException e) {
+                                    }
+                                    catch (InvocationTargetException e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -280,7 +282,8 @@ public abstract class Disguise {
                                     ProtocolLibrary.getProtocolManager()
                                             .sendServerPacket(player, velocityPacket.shallowClone(), false);
                                 }
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
@@ -304,12 +307,14 @@ public abstract class Disguise {
                                     try {
                                         ProtocolLibrary.getProtocolManager()
                                                 .sendServerPacket((Player) getEntity(), selfPacket, false);
-                                    } catch (InvocationTargetException e) {
+                                    }
+                                    catch (InvocationTargetException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             }
-                        } catch (InvocationTargetException e) {
+                        }
+                        catch (InvocationTargetException e) {
                             e.printStackTrace();
                         }
                     }
@@ -483,7 +488,8 @@ public abstract class Disguise {
 
                             ProtocolLibrary.getProtocolManager().sendServerPacket(player, deleteTab);
                         }
-                    } catch (InvocationTargetException e) {
+                    }
+                    catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 }
@@ -522,7 +528,8 @@ public abstract class Disguise {
 
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, addTab);
                     }
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
@@ -764,7 +771,8 @@ public abstract class Disguise {
 
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, addTab);
                     }
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
@@ -804,7 +812,8 @@ public abstract class Disguise {
 
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, addTab);
                 }
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
         }

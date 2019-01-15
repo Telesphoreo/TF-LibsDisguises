@@ -4,9 +4,9 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.packets.PacketsManager;
+import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
-import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -277,7 +277,8 @@ public class DisguiseConfig {
 
         try {
             setUpdatesBranch(UpdatesBranch.valueOf(config.getString("UpdatesBranch").toUpperCase()));
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Cannot parse '" + config.getString("UpdatesBranch") +
                     "' to a valid option for UpdatesBranch");
         }
@@ -290,7 +291,8 @@ public class DisguiseConfig {
                 option += "_SCOREBOARD";
 
             disablePushing = DisguisePushing.valueOf(option);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Cannot parse '" + config.getString("SelfDisguisesScoreboard") +
                     "' to a valid option for SelfDisguisesTeam");
         }
@@ -348,7 +350,8 @@ public class DisguiseConfig {
                 customDisguises.put(key, disguise);
 
                 DisguiseUtilities.getLogger().info("Loaded custom disguise " + key);
-            } catch (DisguiseParseException e) {
+            }
+            catch (DisguiseParseException e) {
                 DisguiseUtilities.getLogger().severe("Error while loading custom disguise '" + key + "'" +
                         (e.getMessage() == null ? "" : ": " + e.getMessage()));
 
@@ -356,7 +359,8 @@ public class DisguiseConfig {
                     e.printStackTrace();
 
                 failedCustomDisguises++;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }

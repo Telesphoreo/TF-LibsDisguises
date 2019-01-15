@@ -174,7 +174,8 @@ public class MetricsInitalizer {
                 try {
                     Class.forName("org.spigotmc.SpigotConfig");
                     return "Yes";
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     return "No";
                 }
             }
