@@ -12,6 +12,7 @@ import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.packets.LibsPackets;
 import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
@@ -87,7 +88,8 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
 
                 try {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(observer, newPacket, false);
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
@@ -147,7 +149,8 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
 
                 try {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(observer, metaPacket);
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
             } else if (event.getPacketType() == Server.ANIMATION) {
@@ -166,8 +169,14 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
                         packet.getBytes().read(0) == 2) {
                     event.setCancelled(true);
                 }
+            } else if (event.getPacketType() == Server.ENTITY_VELOCITY &&
+                    !DisguiseUtilities.isPlayerVelocity(observer)) {
+                // The player only sees velocity changes when there is a velocity event. As the method claims there
+                // was no velocity event...
+                event.setCancelled(true);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             event.setCancelled(true);
             ex.printStackTrace();
         }

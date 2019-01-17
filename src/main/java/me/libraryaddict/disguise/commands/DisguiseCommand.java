@@ -87,6 +87,7 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
             return true;
         }
         // TFM End
+
         if (disguise.isDisguiseInUse()) {
             sender.sendMessage(LibsMsg.DISGUISED.get(disguise.getType().toReadable()));
         } else {
