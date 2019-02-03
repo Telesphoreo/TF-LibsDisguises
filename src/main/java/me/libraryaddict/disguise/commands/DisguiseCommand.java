@@ -9,6 +9,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.*;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -73,7 +74,19 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
                 disguise.setViewSelfDisguise(!disguise.isSelfDisguiseVisible());
         }
 
-        disguise.startDisguise();
+        // TFM Start
+        if (DisguiseBlocker.enabled) {
+            if (DisguiseBlocker.isAllowed(disguise, ((Player) sender).getPlayer())) {
+                disguise.startDisguise();
+            } else {
+                sender.sendMessage(LibsMsg.DISGUISE_FORBIDDEN.get());
+                return true;
+            }
+        } else {
+            sender.sendMessage(LibsMsg.DISGUISES_DISABLED.get());
+            return true;
+        }
+        // TFM End
 
         if (disguise.isDisguiseInUse()) {
             sender.sendMessage(LibsMsg.DISGUISED.get(disguise.getType().toReadable()));

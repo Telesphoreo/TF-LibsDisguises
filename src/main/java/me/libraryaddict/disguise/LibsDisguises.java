@@ -14,6 +14,7 @@ import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
@@ -74,8 +75,6 @@ public class LibsDisguises extends JavaPlugin {
         if (!DisguiseConfig.isDisableCommands()) {
             registerCommand("disguise", new DisguiseCommand());
             registerCommand("undisguise", new UndisguiseCommand());
-            registerCommand("disguiseplayer", new DisguisePlayerCommand());
-            registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
             registerCommand("undisguiseentity", new UndisguiseEntityCommand());
             registerCommand("disguiseentity", new DisguiseEntityCommand());
             registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
@@ -134,6 +133,16 @@ public class LibsDisguises extends JavaPlugin {
     public void reload() {
         DisguiseConfig.loadConfig();
     }
+
+    /**
+     * Used for enabling/disabling disguises through TotalFreedomMod.
+     *
+     * @param enable The return status of whether disguises are enabled.
+     */
+    public void toggleUsability(boolean enable) {
+        DisguiseBlocker.enabled = enable;
+    }
+
 
     /**
      * Here we create a nms entity for each disguise. Then grab their default values in their datawatcher. Then their
