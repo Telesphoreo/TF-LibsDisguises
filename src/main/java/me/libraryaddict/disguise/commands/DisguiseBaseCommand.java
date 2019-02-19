@@ -6,6 +6,7 @@ import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.parser.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -189,7 +190,9 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
             if (type.isUnknown())
                 continue;
 
-            allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            if (DisguiseBlocker.isAllowed(type.getType()) && !type.isUnknown()) {
+                allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            }
         }
 
         return allowedDisguises;
