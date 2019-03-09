@@ -9,7 +9,6 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -37,9 +36,8 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
         Disguise disguise;
 
         try {
-            disguise = DisguiseParser
-                    .parseDisguise(sender, getPermNode(), DisguiseUtilities.split(StringUtils.join(args, " ")),
-                            getPermissions(sender));
+            disguise = DisguiseParser.parseDisguise(sender, (Entity) sender, getPermNode(),
+                    DisguiseUtilities.split(StringUtils.join(args, " ")), getPermissions(sender));
         }
         catch (DisguiseParseException ex) {
             if (ex.getMessage() != null) {
@@ -72,19 +70,7 @@ public class DisguiseCommand extends DisguiseBaseCommand implements TabCompleter
                 disguise.setViewSelfDisguise(!disguise.isSelfDisguiseVisible());
         }
 
-        // TFM Start
-        if (DisguiseBlocker.enabled) {
-            if (DisguiseBlocker.isAllowed(disguise, ((Player) sender).getPlayer())) {
-                disguise.startDisguise();
-            } else {
-                sender.sendMessage(LibsMsg.DISGUISE_FORBIDDEN.get());
-                return true;
-            }
-        } else {
-            sender.sendMessage(LibsMsg.DISGUISES_DISABLED.get());
-            return true;
-        }
-        // TFM End
+        disguise.startDisguise();
 
         if (disguise.isDisguiseInUse()) {
             sender.sendMessage(LibsMsg.DISGUISED.get(disguise.getType().toReadable()));

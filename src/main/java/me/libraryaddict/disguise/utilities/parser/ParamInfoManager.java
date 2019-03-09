@@ -103,10 +103,12 @@ public class ParamInfoManager {
 
         // Add these last as it's what we want to present to be called the least
         for (String methodName : new String[]{"setViewSelfDisguise", "setHideHeldItemFromSelf", "setHideArmorFromSelf",
-                "setHearSelfDisguise", "setHidePlayer"}) {
+                "setHearSelfDisguise", "setHidePlayer", "setExpires"}) {
             try {
-                methods.add(Disguise.class.getMethod(methodName, boolean.class));
-            } catch (Exception ex) {
+                methods.add(Disguise.class
+                        .getMethod(methodName, methodName.equals("setExpires") ? long.class : boolean.class));
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -115,7 +117,7 @@ public class ParamInfoManager {
     }
 
     /**
-     * Value of the method, used namely for displaying the more unique methods to a disguise
+     * Value of the method, used namely for ordering the more unique methods to a disguise
      */
     public static int getValue(Method method) {
         ChatColor methodColor = ChatColor.YELLOW;

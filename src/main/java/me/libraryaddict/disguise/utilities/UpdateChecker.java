@@ -98,7 +98,8 @@ public class UpdateChecker {
                     return version;
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Failed to check for a update on spigot.");
         }
 
@@ -106,9 +107,9 @@ public class UpdateChecker {
     }
 
     private boolean isNewerVersion(String currentVersion, String newVersion) {
-        // Remove 'v' from string, split by decimal points
-        String[] cSplit = currentVersion.replace("v", "").split("\\.");
-        String[] nSplit = newVersion.replace("v", "").split("\\.");
+        // Remove 'v' and '-SNAPSHOT' from string, split by decimal points
+        String[] cSplit = currentVersion.replaceAll("(v)|(-SNAPSHOT)", "").split("\\.");
+        String[] nSplit = newVersion.replaceAll("(v)|(-SNAPSHOT)", "").split("\\.");
 
         // Iterate over the versions from left to right
         for (int i = 0; i < Math.max(cSplit.length, nSplit.length); i++) {
@@ -118,6 +119,20 @@ public class UpdateChecker {
             } else if (nSplit.length <= i) {
                 // If the new version doesn't have the next version, then it's older
                 return false;
+            }
+
+            // If both strings are numerical
+            if (cSplit[i].matches("[0-9]+") && nSplit[i].matches("[0-9]+")) {
+                int cInt = Integer.parseInt(cSplit[i]);
+                int nInt = Integer.parseInt(nSplit[i]);
+
+                // Same version
+                if (cInt == nInt) {
+                    continue;
+                }
+
+                // Return if current version is inferior to new version
+                return cInt < nInt;
             }
 
             // String compare the versions, should perform the same as an int compare
@@ -156,7 +171,8 @@ public class UpdateChecker {
             }
 
             return jsonObject;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             DisguiseUtilities.getLogger().warning("Failed to check for a snapshot update on jenkins.");
         }
 
