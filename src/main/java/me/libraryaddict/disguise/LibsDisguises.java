@@ -17,7 +17,6 @@ import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.totalfreedom.disguise.DisguiseBlocker;
-import me.totalfreedom.disguise.Updater;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
@@ -107,9 +106,6 @@ public class LibsDisguises extends JavaPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             DisguiseUtilities.removeSelfDisguiseScoreboard(player);
         }
-
-        Updater updater = new Updater();
-        updater.update(LibsDisguises.getInstance());
     }
 
     public boolean isReleaseBuild() {
