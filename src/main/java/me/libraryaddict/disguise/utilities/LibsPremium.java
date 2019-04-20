@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities;
 
+import com.comphenix.protocol.PacketType;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 
