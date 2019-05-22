@@ -5,6 +5,7 @@ import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
@@ -336,7 +337,7 @@ public class DisguiseParser {
             }
         } else {
             disguisePerm = getDisguisePerm(args[0]);
-            Entry<DisguisePerm, String> customDisguise = DisguiseConfig.getCustomDisguise(args[0]);
+            Entry<DisguisePerm, String> customDisguise = DisguiseConfig.getRawCustomDisguise(args[0]);
 
             if (customDisguise != null) {
                 args = DisguiseUtilities.split(customDisguise.getValue());

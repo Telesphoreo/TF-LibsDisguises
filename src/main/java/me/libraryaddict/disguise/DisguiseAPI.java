@@ -26,13 +26,23 @@ import java.util.Map;
 public class DisguiseAPI {
     private static int selfDisguiseId = ReflectionManager.getNewEntityId(true);
 
-    public static String getCustomDisguise(String disguiseName) {
-        Map.Entry<DisguisePerm, String> entry = DisguiseConfig.getCustomDisguise(disguiseName);
+    public static String getRawCustomDisguise(String disguiseName) {
+        Map.Entry<DisguisePerm, String> entry = DisguiseConfig.getRawCustomDisguise(disguiseName);
 
         if (entry == null)
             return null;
 
         return entry.getValue();
+    }
+
+    public static Disguise getCustomDisguise(String disguiseName) {
+        Map.Entry<DisguisePerm, Disguise> disguise = DisguiseConfig.getCustomDisguise(disguiseName);
+
+        if (disguise == null) {
+            return null;
+        }
+
+        return disguise.getValue();
     }
 
     public static Disguise constructDisguise(Entity entity) {
@@ -83,9 +93,6 @@ public class DisguiseAPI {
                 if (saddle != null && saddle.getType() == Material.SADDLE) {
                     ((AbstractHorseWatcher) watcher).setSaddled(true);
                 }
-
-                if (watcher instanceof HorseWatcher)
-                    ((HorseWatcher) watcher).setHorseArmor(horseInventory.getArmor());
             }
         }
         for (Method method : entity.getClass().getMethods()) {
@@ -207,7 +214,7 @@ public class DisguiseAPI {
     }
 
     public static void disguiseIgnorePlayers(Entity entity, Disguise disguise, Player... playersToNotSeeDisguise) {
-        disguiseIgnorePlayers(entity, disguise, (Collection) Arrays.asList(playersToNotSeeDisguise));
+        disguiseIgnorePlayers(entity, disguise, Arrays.asList(playersToNotSeeDisguise));
     }
 
     public static void disguiseIgnorePlayers(Entity entity, Disguise disguise, String... playersToNotSeeDisguise) {
@@ -280,7 +287,7 @@ public class DisguiseAPI {
     }
 
     public static void disguiseToPlayers(Entity entity, Disguise disguise, Player... playersToViewDisguise) {
-        disguiseToPlayers(entity, disguise, (Collection) Arrays.asList(playersToViewDisguise));
+        disguiseToPlayers(entity, disguise, Arrays.asList(playersToViewDisguise));
     }
 
     public static void disguiseToPlayers(Entity entity, Disguise disguise, String... playersToViewDisguise) {

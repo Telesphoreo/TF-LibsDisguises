@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 public class DisguiseConfig {
-    public static enum DisguisePushing { // This enum has a really bad name..
+    public enum DisguisePushing { // This enum has a really bad name..
         MODIFY_SCOREBOARD,
         IGNORE_SCOREBOARD,
-        CREATE_SCOREBOARD;
+        CREATE_SCOREBOARD
     }
 
     public enum UpdatesBranch {
@@ -33,7 +33,6 @@ public class DisguiseConfig {
     }
 
     private static boolean animationEnabled;
-    private static boolean bedEnabled;
     private static boolean blowDisguisesWhenAttacking;
     private static boolean blowDisguisesWhenAttacked;
     private static boolean collectEnabled;
@@ -130,29 +129,48 @@ public class DisguiseConfig {
         explicitDisguisePermissions = explictDisguisePermission;
     }
 
-    public static Entry<DisguisePerm, Disguise> getParsedCustomDisguise(
-            String disguise) throws IllegalAccessException, DisguiseParseException, InvocationTargetException {
-        Entry<DisguisePerm, String> entry = getCustomDisguise(disguise);
+    public static Entry<DisguisePerm, Disguise> getCustomDisguise(String disguise) {
+        Entry<DisguisePerm, String> entry = getRawCustomDisguise(disguise);
 
-        return new HashMap.SimpleEntry(entry.getKey(), DisguiseParser.parseDisguise(entry.getValue()));
+        if (entry == null) {
+            return null;
+        }
+
+        try {
+            return new HashMap.SimpleEntry(entry.getKey(), DisguiseParser.parseDisguise(entry.getValue()));
+        }
+        catch (IllegalAccessException | InvocationTargetException | DisguiseParseException e) {
+            DisguiseUtilities.getLogger().warning("Error when attempting to grab the custom disguise " + disguise);
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-    public static Entry<DisguisePerm, Disguise> getParsedCustomDisguise(Entity target,
+    public static Entry<DisguisePerm, Disguise> getCustomDisguise(Entity target,
             String disguise) throws IllegalAccessException, DisguiseParseException, InvocationTargetException {
-        Entry<DisguisePerm, String> entry = getCustomDisguise(disguise);
+        Entry<DisguisePerm, String> entry = getRawCustomDisguise(disguise);
+
+        if (entry == null) {
+            return null;
+        }
 
         return new HashMap.SimpleEntry(entry.getKey(),
                 DisguiseParser.parseDisguise(Bukkit.getConsoleSender(), target, entry.getValue()));
     }
 
-    public static Entry<DisguisePerm, Disguise> getParsedCustomDisguise(CommandSender invoker, Entity target,
+    public static Entry<DisguisePerm, Disguise> getCustomDisguise(CommandSender invoker, Entity target,
             String disguise) throws IllegalAccessException, DisguiseParseException, InvocationTargetException {
-        Entry<DisguisePerm, String> entry = getCustomDisguise(disguise);
+        Entry<DisguisePerm, String> entry = getRawCustomDisguise(disguise);
+
+        if (entry == null) {
+            return null;
+        }
 
         return new HashMap.SimpleEntry(entry.getKey(), DisguiseParser.parseDisguise(invoker, target, entry.getValue()));
     }
 
-    public static Entry<DisguisePerm, String> getCustomDisguise(String disguise) {
+    public static Entry<DisguisePerm, String> getRawCustomDisguise(String disguise) {
         for (Entry<DisguisePerm, String> entry : customDisguises.entrySet()) {
             String name = entry.getKey().toReadable();
 
@@ -288,7 +306,6 @@ public class DisguiseConfig {
         setWitherSkullPacketsEnabled(config.getBoolean("PacketsEnabled.WitherSkull"));
         setEquipmentPacketsEnabled(config.getBoolean("PacketsEnabled.Equipment"));
         setAnimationPacketsEnabled(config.getBoolean("PacketsEnabled.Animation"));
-        setBedPacketsEnabled(config.getBoolean("PacketsEnabled.Bed"));
         setEntityStatusPacketsEnabled(config.getBoolean("PacketsEnabled.EntityStatus"));
         setCollectPacketsEnabled(config.getBoolean("PacketsEnabled.Collect"));
         setMetadataPacketsEnabled(config.getBoolean("PacketsEnabled.Metadata"));
@@ -383,7 +400,7 @@ public class DisguiseConfig {
         for (String key : section.getKeys(false)) {
             String toParse = section.getString(key);
 
-            if (getCustomDisguise(toParse) != null) {
+            if (getRawCustomDisguise(toParse) != null) {
                 DisguiseUtilities.getLogger()
                         .severe("Cannot create the custom disguise '" + key + "' as there is a name conflict!");
                 continue;
@@ -426,10 +443,6 @@ public class DisguiseConfig {
 
     public static boolean isAnimationPacketsEnabled() {
         return animationEnabled;
-    }
-
-    public static boolean isBedPacketsEnabled() {
-        return bedEnabled;
     }
 
     public static boolean isCollectPacketsEnabled() {
@@ -576,14 +589,6 @@ public class DisguiseConfig {
     public static void setAnimationPacketsEnabled(boolean enabled) {
         if (enabled != isAnimationPacketsEnabled()) {
             animationEnabled = enabled;
-
-            PacketsManager.setupMainPacketsListener();
-        }
-    }
-
-    public static void setBedPacketsEnabled(boolean enabled) {
-        if (enabled != isBedPacketsEnabled()) {
-            bedEnabled = enabled;
 
             PacketsManager.setupMainPacketsListener();
         }

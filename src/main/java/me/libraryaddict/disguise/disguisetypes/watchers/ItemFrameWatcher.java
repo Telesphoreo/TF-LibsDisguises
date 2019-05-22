@@ -1,10 +1,11 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
-import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.MetaIndex;
+import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 
 public class ItemFrameWatcher extends FlagWatcher {
     public ItemFrameWatcher(Disguise disguise) {
@@ -16,7 +17,7 @@ public class ItemFrameWatcher extends FlagWatcher {
             return new ItemStack(Material.AIR);
         }
 
-        return (ItemStack) getData(MetaIndex.ITEMFRAME_ITEM);
+        return getData(MetaIndex.ITEMFRAME_ITEM);
     }
 
     public int getRotation() {

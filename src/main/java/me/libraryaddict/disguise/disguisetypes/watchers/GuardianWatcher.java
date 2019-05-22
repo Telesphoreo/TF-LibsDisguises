@@ -1,10 +1,11 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 
 public class GuardianWatcher extends InsentientWatcher {
     public GuardianWatcher(Disguise disguise) {
@@ -17,7 +18,7 @@ public class GuardianWatcher extends InsentientWatcher {
      * @return
      */
     public boolean isTarget() {
-        return ((int) getData(MetaIndex.GUARDIAN_TARGET)) != 0;
+        return getData(MetaIndex.GUARDIAN_TARGET) != 0;
     }
 
     /**
