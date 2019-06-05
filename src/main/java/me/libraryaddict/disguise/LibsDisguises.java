@@ -16,6 +16,7 @@ import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -128,6 +129,15 @@ public class LibsDisguises extends JavaPlugin {
     @Deprecated
     public void reload() {
         DisguiseConfig.loadConfig();
+    }
+
+    /**
+     * Used for enabling/disabling disguises through TotalFreedomMod.
+     *
+     * @param enable The return status of whether disguises are enabled.
+     */
+    public void toggleUsability(boolean enable) {
+        DisguiseBlocker.enabled = enable;
     }
 
     /**
