@@ -55,13 +55,6 @@ public class LibsDisguises extends JavaPlugin {
 
         LibsPremium.check(getDescription().getVersion());
 
-        if (!ReflectionManager.getMinecraftVersion().startsWith("1.14")) {
-            getLogger().severe("You're using the wrong version of Lib's Disguises for your server! This is " +
-                    "intended for 1.14!");
-            getPluginLoader().disablePlugin(this);
-            return;
-        }
-
         PacketsManager.init(this);
         DisguiseUtilities.init(this);
 
