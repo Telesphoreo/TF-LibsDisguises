@@ -37,7 +37,7 @@ public class PacketsManager {
 
         ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(clientInteractEntityListener)
                 .syncStart();
-        ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(tabListListener).syncStart();
+        ProtocolLibrary.getProtocolManager().addPacketListener(tabListListener);
 
         // Now I call this and the main listener is registered!
         setupMainPacketsListener();
@@ -91,10 +91,9 @@ public class PacketsManager {
             inventoryModifierEnabled = enabled;
 
             if (inventoryModifierEnabled) {
-                ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(inventoryListener)
-                        .syncStart();
+                ProtocolLibrary.getProtocolManager().addPacketListener(inventoryListener);
             } else {
-                ProtocolLibrary.getProtocolManager().getAsynchronousManager().unregisterAsyncHandler(inventoryListener);
+                ProtocolLibrary.getProtocolManager().addPacketListener(inventoryListener);
             }
 
             for (Player player : Bukkit.getOnlinePlayers()) {
@@ -113,7 +112,7 @@ public class PacketsManager {
     public static void setupMainPacketsListener() {
         if (clientInteractEntityListener != null) {
             if (mainListener != null) {
-                ProtocolLibrary.getProtocolManager().getAsynchronousManager().unregisterAsyncHandler(mainListener);
+                ProtocolLibrary.getProtocolManager().removePacketListener(mainListener);
             }
 
             ArrayList<PacketType> packetsToListen = new ArrayList<>();
@@ -166,8 +165,7 @@ public class PacketsManager {
 
             mainListener = new PacketListenerMain(libsDisguises, packetsToListen);
 
-            ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(mainListener)
-                    .syncStart();
+            ProtocolLibrary.getProtocolManager().addPacketListener(mainListener);
         }
     }
 
@@ -176,10 +174,9 @@ public class PacketsManager {
             viewDisguisesListenerEnabled = enabled;
 
             if (viewDisguisesListenerEnabled) {
-                ProtocolLibrary.getProtocolManager().getAsynchronousManager().registerAsyncHandler(viewDisguisesListener)
-                        .syncStart();
+                ProtocolLibrary.getProtocolManager().addPacketListener(viewDisguisesListener);
             } else {
-                ProtocolLibrary.getProtocolManager().getAsynchronousManager().unregisterAsyncHandler(viewDisguisesListener);
+                ProtocolLibrary.getProtocolManager().removePacketListener(viewDisguisesListener);
             }
 
             for (Player player : Bukkit.getOnlinePlayers()) {
