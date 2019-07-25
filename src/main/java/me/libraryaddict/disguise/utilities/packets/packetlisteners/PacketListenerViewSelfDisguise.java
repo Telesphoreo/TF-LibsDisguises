@@ -12,7 +12,9 @@ import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.packets.LibsPackets;
 import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
@@ -111,7 +113,10 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
             transformed.sendDelayed(observer);
 
             if (event.getPacketType() == Server.ENTITY_METADATA) {
-                event.setPacket(packet = packet.deepClone());
+                if (!LibsPremium.getPluginInformation().isPremium() || LibsPremium.getPaidInformation() != null ||
+                        LibsPremium.getPluginInformation().getBuildNumber().matches("[0-9]+")) {
+                    event.setPacket(packet = packet.deepClone());
+                }
 
                 for (WrappedWatchableObject watch : packet.getWatchableCollectionModifier().read(0)) {
                     if (watch.getIndex() == 0) {
@@ -140,7 +145,7 @@ public class PacketListenerViewSelfDisguise extends PacketAdapter {
                 if (observer.isSprinting())
                     b = (byte) (b | 1 << 3);
 
-                WrappedWatchableObject watch = ReflectionManager.createWatchable(0, b);
+                WrappedWatchableObject watch = ReflectionManager.createWatchable(MetaIndex.ENTITY_META, b);
 
                 if (watch != null)
                     watchableList.add(watch);

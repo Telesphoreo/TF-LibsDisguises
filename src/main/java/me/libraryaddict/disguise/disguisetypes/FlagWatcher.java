@@ -41,7 +41,6 @@ public class FlagWatcher {
 
     public FlagWatcher(Disguise disguise) {
         this.disguise = (TargetedDisguise) disguise;
-        this.setData(MetaIndex.ENTITY_AIR_TICKS, 0);
         equipment = new LibsEquipment(this);
     }
 
@@ -112,7 +111,7 @@ public class FlagWatcher {
 
                 boolean isDirty = watch.getDirtyState();
 
-                watch = ReflectionManager.createWatchable(id, value);
+                watch = ReflectionManager.createWatchable(MetaIndex.getMetaIndex(this, id), value);
 
                 if (watch == null)
                     continue;
@@ -123,7 +122,7 @@ public class FlagWatcher {
             } else {
                 boolean isDirty = watch.getDirtyState();
 
-                watch = ReflectionManager.createWatchable(id, watch.getValue());
+                watch = ReflectionManager.createWatchable(MetaIndex.getMetaIndex(this, id), watch.getValue());
 
                 if (watch == null)
                     continue;
@@ -149,7 +148,8 @@ public class FlagWatcher {
                     continue;
                 }
 
-                WrappedWatchableObject watch = ReflectionManager.createWatchable(id, value);
+                WrappedWatchableObject watch = ReflectionManager
+                        .createWatchable(MetaIndex.getMetaIndex(this, id), value);
 
                 if (watch == null)
                     continue;
@@ -317,9 +317,10 @@ public class FlagWatcher {
             WrappedWatchableObject watchable;
 
             if (entityValues.containsKey(i) && entityValues.get(i) != null) {
-                watchable = ReflectionManager.createWatchable(i, entityValues.get(i));
+                watchable = ReflectionManager.createWatchable(MetaIndex.getMetaIndex(this, i), entityValues.get(i));
             } else if (backupEntityValues.containsKey(i) && backupEntityValues.get(i) != null) {
-                watchable = ReflectionManager.createWatchable(i, backupEntityValues.get(i));
+                watchable = ReflectionManager
+                        .createWatchable(MetaIndex.getMetaIndex(this, i), backupEntityValues.get(i));
             } else {
                 continue;
             }
@@ -354,7 +355,7 @@ public class FlagWatcher {
                         WrappedDataWatcher.getEntityWatcher(disguise.getEntity()).getByte(0));
             }
 
-            WrappedWatchableObject watch = ReflectionManager.createWatchable(data.getIndex(), value);
+            WrappedWatchableObject watch = ReflectionManager.createWatchable(data, value);
 
             if (watch == null)
                 continue;
