@@ -55,12 +55,6 @@ public class UndisguisePlayerCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (sender instanceof Player && !sender.isOp() &&
-                (!LibsPremium.isPremium() || LibsPremium.getPaidInformation() == LibsPremium.getPluginInformation())) {
-            sender.sendMessage(ChatColor.RED + "Please purchase Lib's Disguises to enable player commands");
-            return true;
-        }
-
         if (!sender.hasPermission("libsdisguises.undisguiseplayer")) {
             sender.sendMessage(LibsMsg.NO_PERM.get());
             return true;
