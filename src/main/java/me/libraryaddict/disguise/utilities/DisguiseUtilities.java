@@ -7,6 +7,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.*;
+import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
@@ -48,6 +49,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,7 +60,7 @@ public class DisguiseUtilities {
     /**
      * A hashmap of the uuid's of entitys, alive and dead. And their disguises in use
      */
-    private static HashMap<UUID, HashSet<TargetedDisguise>> disguisesInUse = new HashMap<>();
+    private static Map<UUID, Set<TargetedDisguise>> disguisesInUse = new ConcurrentHashMap<>();
     /**
      * Disguises which are stored ready for a entity to be seen by a player Preferably, disguises in this should only
      * stay in for
@@ -83,6 +85,8 @@ public class DisguiseUtilities {
      */
     private static long velocityTime;
     private static int velocityID;
+    private static HashMap<UUID, ArrayList<Integer>> disguiseLoading = new HashMap<>();
+    private static boolean runningPaper;
 
     public static void setPlayerVelocity(Player player) {
         velocityID = player.getEntityId();
@@ -132,7 +136,7 @@ public class DisguiseUtilities {
 
         getLogger().info("Now saving disguises..");
 
-        for (HashSet<TargetedDisguise> list : disguisesInUse.values()) {
+        for (Set<TargetedDisguise> list : getDisguises().values()) {
             for (TargetedDisguise disg : list) {
                 if (disg.getEntity() == null)
                     continue;
@@ -306,7 +310,7 @@ public class DisguiseUtilities {
 
     public static void addDisguise(UUID entityId, TargetedDisguise disguise) {
         if (!getDisguises().containsKey(entityId)) {
-            getDisguises().put(entityId, new HashSet<TargetedDisguise>());
+            getDisguises().put(entityId, Collections.synchronizedSet(new HashSet<>()));
         }
 
         getDisguises().get(entityId).add(disguise);
@@ -613,13 +617,13 @@ public class DisguiseUtilities {
         return null;
     }
 
-    public static HashMap<UUID, HashSet<TargetedDisguise>> getDisguises() {
+    public static Map<UUID, Set<TargetedDisguise>> getDisguises() {
         return disguisesInUse;
     }
 
     public static TargetedDisguise[] getDisguises(UUID entityId) {
         if (getDisguises().containsKey(entityId)) {
-            HashSet<TargetedDisguise> disguises = getDisguises().get(entityId);
+            Set<TargetedDisguise> disguises = getDisguises().get(entityId);
 
             return disguises.toArray(new TargetedDisguise[disguises.size()]);
         }
@@ -731,22 +735,6 @@ public class DisguiseUtilities {
                 }
             }
         }, LibsDisguises.getInstance().getConfig().getBoolean("ContactMojangServers", true));
-    }
-
-    /**
-     * Pass in a set, check if it's a hashset. If it's not, return false. If you pass in something else, you failed.
-     *
-     * @param obj
-     * @return
-     */
-    private static boolean isHashSet(Object obj) {
-        if (obj instanceof HashSet)
-            return true; // It's Spigot/Bukkit
-
-        if (obj instanceof Set)
-            return false; // It's PaperSpigot/SportsBukkit
-
-        throw new IllegalArgumentException("Object passed was not either a hashset or set!");
     }
 
     /**
@@ -871,6 +859,13 @@ public class DisguiseUtilities {
     }
 
     public static void init(LibsDisguises disguises) {
+        try {
+            runningPaper = Class.forName("com.destroystokyo.paper.VersionHistoryManager$VersionData") != null;
+        }
+        catch (Exception ex) {
+
+        }
+
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(MetaIndex.class, new SerializerMetaIndex());
         gsonBuilder.registerTypeAdapter(WrappedGameProfile.class, new SerializerGameProfile());
@@ -977,7 +972,12 @@ public class DisguiseUtilities {
         cachedNames.addAll(Arrays.asList(profileCache.list()));
 
         for (String key : savedDisguises.list()) {
-            savedDisguiseList.add(UUID.fromString(key));
+            try {
+                savedDisguiseList.add(UUID.fromString(key));
+            }
+            catch (Exception ex) {
+                getLogger().warning("The file '" + key + "' does not belong in " + savedDisguises.getAbsolutePath());
+            }
         }
     }
 
@@ -1132,7 +1132,6 @@ public class DisguiseUtilities {
             return;
         }
 
-
         try {
             if (selfDisguised.contains(disguise.getEntity().getUniqueId()) && disguise.isDisguiseInUse()) {
                 removeSelfDisguise((Player) disguise.getEntity());
@@ -1253,11 +1252,12 @@ public class DisguiseUtilities {
             Object entityTrackerEntry = ReflectionManager.getEntityTrackerEntry(player);
 
             if (entityTrackerEntry != null) {
-                Object trackedPlayersObj = ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayers")
-                        .get(entityTrackerEntry);
 
                 // If the tracker exists. Remove himself from his tracker
-                if (isHashSet(trackedPlayersObj)) {
+                if (!runningPaper) {
+                    Object trackedPlayersObj = ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayers")
+                            .get(entityTrackerEntry);
+
                     ((Set<Object>) trackedPlayersObj).remove(ReflectionManager.getNmsEntity(player));
                 } else {
                     ((Map<Object, Object>) ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayerMap")
@@ -1543,16 +1543,18 @@ public class DisguiseUtilities {
 
             setupSelfDisguiseScoreboard(player);
 
-            // Add himself to his own entity tracker
-            Object trackedPlayersObj = ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayers")
-                    .get(entityTrackerEntry);
-
             // Check for code differences in PaperSpigot vs Spigot
-            if (isHashSet(trackedPlayersObj)) {
+            if (!runningPaper) {
+                // Add himself to his own entity tracker
+                Object trackedPlayersObj = ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayers")
+                        .get(entityTrackerEntry);
+
                 ((Set<Object>) trackedPlayersObj).add(ReflectionManager.getNmsEntity(player));
             } else {
-                ((Map<Object, Object>) ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayerMap")
-                        .get(entityTrackerEntry)).put(ReflectionManager.getNmsEntity(player), true);
+                Field field = ReflectionManager.getNmsField("EntityTrackerEntry", "trackedPlayerMap");
+                Object nmsEntity = ReflectionManager.getNmsEntity(player);
+                Map<Object, Object> map = ((Map<Object, Object>) field.get(entityTrackerEntry));
+                map.put(nmsEntity, true);
             }
 
             ProtocolManager manager = ProtocolLibrary.getProtocolManager();
@@ -1721,7 +1723,6 @@ public class DisguiseUtilities {
             return;
         }
 
-        // player.spigot().setCollidesWithEntities(false);
         // Finish up
         selfDisguised.add(player.getUniqueId());
 
@@ -1791,9 +1792,10 @@ public class DisguiseUtilities {
                 if (watchableObject.getValue() == null)
                     continue;
 
+                MetaIndex metaIndex = MetaIndex.getMetaIndex(disguiseWatcher, watchableObject.getIndex());
+
                 WrappedDataWatcher.WrappedDataWatcherObject obj = ReflectionManager
-                        .createDataWatcherObject(MetaIndex.getMetaIndex(disguiseWatcher, watchableObject.getIndex()),
-                                watchableObject.getValue());
+                        .createDataWatcherObject(metaIndex, watchableObject.getValue());
 
                 newWatcher.setObject(obj, watchableObject.getValue());
             }
@@ -1872,8 +1874,6 @@ public class DisguiseUtilities {
             entityId = observer.getEntityId();
         }
 
-        // TODO Needs to be thread safe, not thread safe atm due to testing
-
         if (getFutureDisguises().containsKey(entityId)) {
             HashSet<TargetedDisguise> hashSet = getFutureDisguises().get(entityId);
 
@@ -1886,7 +1886,7 @@ public class DisguiseUtilities {
             }
         }
 
-        for (HashSet<TargetedDisguise> disguises : getDisguises().values()) {
+        for (Set<TargetedDisguise> disguises : getDisguises().values()) {
             for (TargetedDisguise dis : disguises) {
                 if (dis.getEntity() == null || !dis.isDisguiseInUse()) {
                     continue;

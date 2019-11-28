@@ -16,6 +16,7 @@ Permissions:
 
 # Disables commands with the exception of /libsdisguises. Useful if you don't want the plugin to be used by anything
 #  but a plugin
+# Useful if you didn't purchase the plugin.
 DisableCommands: false
 
 # The disguise plugin stores all GameProfiles inside a folder called "GameProfiles" as a local cache
@@ -118,6 +119,12 @@ AddEntityAnimations: true
 # Please note that this will not remove the dye from their hands. This also does not check if the disguised entity is actually a sheep/wolf and wants a say in its color.
 DyeableSheep: false
 DyeableWolf: false
+DyeableCat: false
+# Can a player interact with a llama with carpet to set or change their carpet color?
+CarpetableLlama: false
+# Can a player interact with a non-saddled horse of any type, to give it a saddle?
+# This does not change what you can ride or control!
+SaddleableHorse: false
 
 # This is only called into action when the disguise is constructed using the commands.
 # And when the disguise supports that. This will not be used at all for plugins constructing the disguises for instance.
@@ -207,6 +214,11 @@ DisableInvisibility: false
 # If true, it means they will experience the full 9 minutes, even if they log on for just a minute per day
 # Expired message can be hidden with an empty translation message
 DynamicExpiry: false
+
+# Some players have issues with conflicting plugins where disguised entities will show the wrong armor
+# This should be left alone unless you're trying to solve this issue. Such as MM and stone blocks.
+# When true, the plugin will hide player disguises armor to prevent a minor visual bug for half a second
+PlayerHideArmor: true
 
 # This will help performance, especially with CPU
 # Due to safety reasons, self disguises can never have their packets disabled.

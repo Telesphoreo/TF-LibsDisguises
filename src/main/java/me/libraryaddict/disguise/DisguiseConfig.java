@@ -38,6 +38,9 @@ public class DisguiseConfig {
     private static boolean collectEnabled;
     private static boolean colorizeSheep;
     private static boolean colorizeWolf;
+    private static boolean colorizeCat;
+    private static boolean saddleableHorse;
+    private static boolean carpetableLlama;
     private static HashMap<DisguisePerm, String> customDisguises = new HashMap<>();
     private static boolean disableInvisibility;
     private static int disguiseCloneExpire;
@@ -81,6 +84,15 @@ public class DisguiseConfig {
     private static UpdatesBranch updatesBranch = UpdatesBranch.SAME_BUILDS;
     private static int playerDisguisesTablistExpires;
     private static boolean dynamicExpiry;
+    private static boolean playerHideArmor;
+
+    public static boolean isPlayerHideArmor() {
+        return playerHideArmor;
+    }
+
+    public static void setPlayerHideArmor(boolean playerHiddenArmor) {
+        playerHideArmor = playerHiddenArmor;
+    }
 
     public static boolean isDynamicExpiry() {
         return dynamicExpiry;
@@ -315,6 +327,9 @@ public class DisguiseConfig {
         setMaxClonedDisguises(config.getInt("DisguiseCloneSize"));
         setSheepDyeable(config.getBoolean("DyeableSheep"));
         setWolfDyeable(config.getBoolean("DyeableWolf"));
+        setCatDyeable(config.getBoolean("DyeableCat"));
+        setHorseSaddleable(config.getBoolean("SaddleableHorse"));
+        setLlamaCarpetable(config.getBoolean("CarpetableLlama"));
         setUndisguiseOnWorldChange(config.getBoolean("UndisguiseOnWorldChange"));
         setUpdateNotificationPermission(config.getString("Permission"));
         setStopShulkerDisguisesFromMoving(config.getBoolean("StopShulkerDisguisesFromMoving", true));
@@ -334,6 +349,7 @@ public class DisguiseConfig {
         setUUIDGeneratedVersion(config.getInt("UUIDVersion"));
         setPlayerDisguisesTablistExpires(config.getInt("PlayerDisguisesTablistExpires"));
         setDynamicExpiry(config.getBoolean("DynamicExpiry"));
+        setPlayerHideArmor(config.getBoolean("PlayerHideArmor"));
 
         if (!LibsPremium.isPremium() && (isSavePlayerDisguises() || isSaveEntityDisguises())) {
             DisguiseUtilities.getLogger().warning("You must purchase the plugin to use saved disguises!");
@@ -768,6 +784,30 @@ public class DisguiseConfig {
 
     public static void setWolfDyeable(boolean color) {
         colorizeWolf = color;
+    }
+
+    public static void setCatDyeable(boolean color) {
+        colorizeCat = color;
+    }
+
+    public static boolean isCatDyeable() {
+        return colorizeCat;
+    }
+
+    public static void setHorseSaddleable(boolean saddle) {
+        saddleableHorse = saddle;
+    }
+
+    public static boolean isHorseSaddleable() {
+        return saddleableHorse;
+    }
+
+    public static void setLlamaCarpetable(boolean carpet) {
+        carpetableLlama = carpet;
+    }
+
+    public static boolean isLlamaCarpetable() {
+        return carpetableLlama;
     }
 
     private DisguiseConfig() {

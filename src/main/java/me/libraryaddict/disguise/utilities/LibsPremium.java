@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by libraryaddict on 2/06/2017.
@@ -93,7 +95,10 @@ public class LibsPremium {
 
         // Comparing major versions
         // Current version must be the same, or lower than premium version
-        return Integer.parseInt(currentSplit[0]) <= Integer.parseInt(premSplit[0]);
+         return Integer.parseInt(currentSplit[0]) <= Integer.parseInt(premSplit[0]);
+
+        // Snapshot must be of current version
+        //return premiumVersion.equals(currentVersion);
     }
 
     private static PluginInformation getInformation(File file) throws Exception {
@@ -191,7 +196,11 @@ public class LibsPremium {
 
             if (plugin.isPremium()) {
                 if (!isValidVersion(version, plugin.getVersion()) || plugin.getUserID() == null ||
-                        plugin.getDownloadID() == null) {
+                        plugin.getDownloadID() == null || plugin.getUserID().equals("666666") ||
+                        plugin.getParsedBuildDate().after(getPluginInformation().getParsedBuildDate()) ||
+                        plugin.getParsedBuildDate().before(new Date(
+                                getPluginInformation().getParsedBuildDate().getTime() -
+                                        TimeUnit.DAYS.toMillis(365 * 2)))) {
                     DisguiseUtilities.getLogger().warning(
                             "You have an old Lib's Disguises jar (" + file.getName() + " " + fileInfo +
                                     ") in the LibsDisguises folder! For security purposes, please replace this with a" +

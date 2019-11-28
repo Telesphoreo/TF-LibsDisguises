@@ -8,7 +8,6 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -23,6 +22,10 @@ import java.util.List;
 public class DisguiseEntityCommand extends DisguiseBaseCommand implements TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (isNotPremium(sender)) {
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             sender.sendMessage(LibsMsg.NO_CONSOLE.get());
             return true;
@@ -57,19 +60,7 @@ public class DisguiseEntityCommand extends DisguiseBaseCommand implements TabCom
             return true;
         }
 
-        // TFM Start
-        if (DisguiseBlocker.enabled) {
-            if (DisguiseBlocker.isAllowed(testDisguise, ((Player) sender).getPlayer())) {
-                LibsDisguises.getInstance().getListener().setDisguiseEntity(sender.getName(), disguiseArgs);
-            } else {
-                sender.sendMessage(LibsMsg.DISGUISE_FORBIDDEN.get());
-                return true;
-            }
-        } else {
-            sender.sendMessage(LibsMsg.DISGUISES_DISABLED.get());
-            return true;
-        }
-        // TFM End
+        LibsDisguises.getInstance().getListener().setDisguiseEntity(sender.getName(), disguiseArgs);
 
         sender.sendMessage(LibsMsg.DISG_ENT_CLICK
                 .get(DisguiseConfig.getDisguiseEntityExpire(), testDisguise.getType().toReadable()));
