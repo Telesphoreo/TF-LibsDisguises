@@ -4,7 +4,7 @@
     <!-- A good example on why temporary names for project identification shouldn't be used -->
     <groupId>LibsDisguises</groupId>
     <artifactId>LibsDisguises</artifactId>
-    <version>9.8.5-SNAPSHOT</version>
+    <version>9.8.5-TF</version>
 
     <build>
         <defaultGoal>clean install</defaultGoal>
@@ -35,7 +35,7 @@
 
 
     <properties>
-        <build.number>unknown</build.number>
+        <build.number>10</build.number>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>dd/MM/yyyy HH:mm</maven.build.timestamp.format>
         <maven.compiler.source>1.8</maven.compiler.source>
