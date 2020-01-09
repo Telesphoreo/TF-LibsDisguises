@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.parser.params.ParamInfo;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -40,12 +41,6 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
     }
 
     protected boolean isNotPremium(CommandSender sender) {
-        if (sender instanceof Player && !sender.isOp() &&
-                (!LibsPremium.isPremium() || LibsPremium.getPaidInformation() == LibsPremium.getPluginInformation())) {
-            sender.sendMessage(ChatColor.RED + "Please purchase Lib's Disguises to enable player commands");
-            return true;
-        }
-
         return false;
     }
 
@@ -206,7 +201,9 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
             if (type.isUnknown())
                 continue;
 
-            allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            if (DisguiseBlocker.isAllowed(type.getType()) && !type.isUnknown()) {
+                allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
+            }
         }
 
         return allowedDisguises;

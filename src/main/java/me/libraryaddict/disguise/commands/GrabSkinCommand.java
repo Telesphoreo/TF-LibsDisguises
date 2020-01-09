@@ -27,11 +27,6 @@ public class GrabSkinCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] strings) {
-        if (sender instanceof Player && !sender.isOp() &&
-                (!LibsPremium.isPremium() || LibsPremium.getPaidInformation() == LibsPremium.getPluginInformation())) {
-            sender.sendMessage(ChatColor.RED + "Please purchase Lib's Disguises to enable player commands");
-            return true;
-        }
 
         if (!sender.hasPermission("libsdisguises.grabskin")) {
             sender.sendMessage(LibsMsg.NO_PERM.get());

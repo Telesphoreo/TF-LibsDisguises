@@ -17,6 +17,7 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.FakeBoundingBox;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -55,16 +56,9 @@ public class LibsDisguises extends JavaPlugin {
         getLogger().info("Build Date: " + pluginYml.getString("build-date"));
 
         LibsPremium.check(getDescription().getVersion(), getFile());
-
-        if (!LibsPremium.isPremium()) {
-            getLogger()
-                    .info("You are running the free version, commands limited to non-players and operators. (Console," +
-                            " Command " + "Blocks, Admins)");
-        }
-
         if (!ReflectionManager.getMinecraftVersion().startsWith("1.15")) {
             getLogger().severe("You're using the wrong version of Lib's Disguises for your server! This is " +
-                    "intended for 1.14.4!");
+                    "intended for 1.15.1!");
             getPluginLoader().disablePlugin(this);
             return;
         }
@@ -89,8 +83,6 @@ public class LibsDisguises extends JavaPlugin {
         if (!DisguiseConfig.isDisableCommands()) {
             registerCommand("disguise", new DisguiseCommand());
             registerCommand("undisguise", new UndisguiseCommand());
-            registerCommand("disguiseplayer", new DisguisePlayerCommand());
-            registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
             registerCommand("undisguiseentity", new UndisguiseEntityCommand());
             registerCommand("disguiseentity", new DisguiseEntityCommand());
             registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
@@ -106,7 +98,7 @@ public class LibsDisguises extends JavaPlugin {
                     new DisguiseModifyRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
             registerCommand("copydisguise", new CopyDisguiseCommand());
             registerCommand("grabskin", new GrabSkinCommand());
-            registerCommand("savedisguise", new SaveDisguiseCommand());
+            // registerCommand("savedisguise", new SaveDisguiseCommand()); - temporarily blocked for now
         } else {
             getLogger().info("Commands has been disabled, as per config");
         }
@@ -151,6 +143,15 @@ public class LibsDisguises extends JavaPlugin {
     @Deprecated
     public void reload() {
         DisguiseConfig.loadConfig();
+    }
+
+    /**
+     * Used for enabling/disabling disguises through TotalFreedomMod.
+     *
+     * @param enable The return status of whether disguises are enabled.
+     */
+    public void toggleUsability(boolean enable) {
+        DisguiseBlocker.enabled = enable;
     }
 
     /**
