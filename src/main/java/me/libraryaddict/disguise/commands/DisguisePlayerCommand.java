@@ -27,6 +27,10 @@ public class DisguisePlayerCommand extends DisguiseBaseCommand implements TabCom
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (isNotPremium(sender)) {
+            return true;
+        }
+
         DisguisePermissions permissions = getPermissions(sender);
 
         if (!permissions.hasPermissions()) {
@@ -127,7 +131,7 @@ public class DisguisePlayerCommand extends DisguiseBaseCommand implements TabCom
 
     private boolean setViewDisguise(String[] strings) {
         for (String string : strings) {
-            if (!string.equalsIgnoreCase("setViewSelfDisguise"))
+            if (!string.equalsIgnoreCase("setSelfDisguiseVisible"))
                 continue;
 
             return true;

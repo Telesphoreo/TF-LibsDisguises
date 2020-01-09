@@ -39,4 +39,9 @@ public class ParamInfoEnum extends ParamInfo {
 
         return null;
     }
+
+    @Override
+    public String toString(Object object) {
+        return object.toString();
+    }
 }

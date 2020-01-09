@@ -42,6 +42,10 @@ public class DisguiseRadiusCommand extends DisguiseBaseCommand implements TabCom
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (isNotPremium(sender)) {
+            return true;
+        }
+
         if (sender.getName().equals("CONSOLE")) {
             sender.sendMessage(LibsMsg.NO_CONSOLE.get());
             return true;
@@ -215,7 +219,7 @@ public class DisguiseRadiusCommand extends DisguiseBaseCommand implements TabCom
 
     private boolean setViewDisguise(String[] strings) {
         for (String string : strings) {
-            if (!string.equalsIgnoreCase("setViewSelfDisguise"))
+            if (!string.equalsIgnoreCase("setSelfDisguiseVisible"))
                 continue;
 
             return true;

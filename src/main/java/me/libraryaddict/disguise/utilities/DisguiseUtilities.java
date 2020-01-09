@@ -1,15 +1,13 @@
 package me.libraryaddict.disguise.utilities;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.*;
-import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.properties.PropertyMap;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
@@ -18,9 +16,9 @@ import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.TargetedDisguise.TargetType;
 import me.libraryaddict.disguise.disguisetypes.watchers.AgeableWatcher;
-import me.libraryaddict.disguise.disguisetypes.watchers.PlayerWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.ZombieWatcher;
 import me.libraryaddict.disguise.utilities.json.*;
+import me.libraryaddict.disguise.utilities.mineskin.MineSkinAPI;
 import me.libraryaddict.disguise.utilities.packets.LibsPackets;
 import me.libraryaddict.disguise.utilities.packets.PacketsManager;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
@@ -29,8 +27,10 @@ import me.libraryaddict.disguise.utilities.reflection.LibsProfileLookup;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import org.apache.logging.log4j.util.Strings;
-import org.bukkit.*;
-import org.bukkit.block.BlockFace;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -69,7 +69,7 @@ public class DisguiseUtilities {
     private static HashMap<Integer, HashSet<TargetedDisguise>> futureDisguises = new HashMap<>();
     private static HashSet<UUID> savedDisguiseList = new HashSet<>();
     private static HashSet<String> cachedNames = new HashSet<>();
-    private static HashMap<String, ArrayList<Object>> runnables = new HashMap<>();
+    private static final HashMap<String, ArrayList<Object>> runnables = new HashMap<>();
     private static HashSet<UUID> selfDisguised = new HashSet<>();
     private static Thread mainThread;
     private static PacketContainer spawnChunk;
@@ -78,7 +78,8 @@ public class DisguiseUtilities {
     private static File profileCache = new File("plugins/LibsDisguises/GameProfiles"), savedDisguises = new File(
             "plugins/LibsDisguises/SavedDisguises");
     private static Gson gson;
-    private static boolean pluginsUsed, commandsUsed;
+    private static boolean pluginsUsed, commandsUsed, copyDisguiseCommandUsed, grabSkinCommandUsed,
+            saveDisguiseCommandUsed;
     private static long libsDisguisesCalled;
     /**
      * Keeps track of what tick this occured
@@ -87,10 +88,20 @@ public class DisguiseUtilities {
     private static int velocityID;
     private static HashMap<UUID, ArrayList<Integer>> disguiseLoading = new HashMap<>();
     private static boolean runningPaper;
+    private static MineSkinAPI mineSkinAPI = new MineSkinAPI();
+
+    public static MineSkinAPI getMineSkinAPI() {
+        return mineSkinAPI;
+    }
 
     public static void setPlayerVelocity(Player player) {
-        velocityID = player.getEntityId();
-        velocityTime = player.getWorld().getTime();
+        if (player == null) {
+            velocityID = 0;
+            velocityTime = 0;
+        } else {
+            velocityID = player.getEntityId();
+            velocityTime = player.getWorld().getTime();
+        }
     }
 
     /**
@@ -100,6 +111,30 @@ public class DisguiseUtilities {
         // Be generous with how many ticks they have until they jump, the server could be lagging and the player
         // would effectively have anti-knockback
         return player.getEntityId() == velocityID && (player.getWorld().getTime() - velocityTime) < 3;
+    }
+
+    public static void setGrabSkinCommandUsed() {
+        grabSkinCommandUsed = true;
+    }
+
+    public static void setCopyDisguiseCommandUsed() {
+        copyDisguiseCommandUsed = true;
+    }
+
+    public static void setSaveDisguiseCommandUsed() {
+        saveDisguiseCommandUsed = true;
+    }
+
+    public static boolean isGrabSkinCommandUsed() {
+        return grabSkinCommandUsed;
+    }
+
+    public static boolean isCopyDisguiseCommandUsed() {
+        return copyDisguiseCommandUsed;
+    }
+
+    public static boolean isSaveDisguiseCommandUsed() {
+        return saveDisguiseCommandUsed;
     }
 
     public static void setPluginsUsed() {
@@ -600,6 +635,12 @@ public class DisguiseUtilities {
 
             return gson.fromJson(cached, WrappedGameProfile.class);
         }
+        catch (JsonSyntaxException ex) {
+            DisguiseUtilities.getLogger()
+                    .warning("Gameprofile " + file.getName() + " had invalid gson and has been deleted");
+            cachedNames.remove(playerName.toLowerCase());
+            file.delete();
+        }
         catch (Exception e) {
             e.printStackTrace();
         }
@@ -670,6 +711,10 @@ public class DisguiseUtilities {
 
             @Override
             public void onLookup(WrappedGameProfile gameProfile) {
+                if (gameProfile == null || gameProfile.getProperties().isEmpty()) {
+                    return;
+                }
+
                 if (DisguiseAPI.isDisguiseInUse(disguise) && (!gameProfile.getName()
                         .equals(disguise.getSkin() != null ? disguise.getSkin() : disguise.getName()) ||
                         !gameProfile.getProperties().isEmpty())) {
@@ -705,8 +750,14 @@ public class DisguiseUtilities {
         final String playerName = origName.toLowerCase();
 
         if (DisguiseConfig.isSaveGameProfiles() && hasGameProfile(playerName)) {
-            return getGameProfile(playerName);
-        } else if (Pattern.matches("([A-Za-z0-9_]){1,16}", origName)) {
+            WrappedGameProfile profile = getGameProfile(playerName);
+
+            if (profile != null) {
+                return profile;
+            }
+        }
+
+        if (Pattern.matches("([A-Za-z0-9_]){1,16}", origName)) {
             final Player player = Bukkit.getPlayerExact(playerName);
 
             if (player != null) {
@@ -721,55 +772,57 @@ public class DisguiseUtilities {
                 }
             }
 
-            if (contactMojang && !runnables.containsKey(playerName)) {
-                Bukkit.getScheduler().runTaskAsynchronously(LibsDisguises.getInstance(), new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            final WrappedGameProfile gameProfile = lookupGameProfile(origName);
+            synchronized (runnables) {
+                if (contactMojang && !runnables.containsKey(playerName)) {
+                    runnables.put(playerName, new ArrayList<>());
 
-                            Bukkit.getScheduler().runTask(LibsDisguises.getInstance(), new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (gameProfile.getProperties().isEmpty()) {
-                                        return;
-                                    }
+                    if (runnable != null) {
+                        runnables.get(playerName).add(runnable);
+                    }
 
-                                    if (DisguiseConfig.isSaveGameProfiles()) {
-                                        addGameProfile(playerName, gameProfile);
-                                    }
+                    Bukkit.getScheduler().runTaskAsynchronously(LibsDisguises.getInstance(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                final WrappedGameProfile gameProfile = lookupGameProfile(origName);
 
-                                    if (runnables.containsKey(playerName)) {
-                                        for (Object obj : runnables.remove(playerName)) {
-                                            if (obj instanceof Runnable) {
-                                                ((Runnable) obj).run();
-                                            } else if (obj instanceof LibsProfileLookup) {
-                                                ((LibsProfileLookup) obj).onLookup(gameProfile);
+                                Bukkit.getScheduler().runTask(LibsDisguises.getInstance(), new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (DisguiseConfig.isSaveGameProfiles()) {
+                                            addGameProfile(playerName, gameProfile);
+                                        }
+
+                                        synchronized (runnables) {
+                                            if (runnables.containsKey(playerName)) {
+                                                for (Object obj : runnables.remove(playerName)) {
+                                                    if (obj instanceof Runnable) {
+                                                        ((Runnable) obj).run();
+                                                    } else if (obj instanceof LibsProfileLookup) {
+                                                        ((LibsProfileLookup) obj).onLookup(gameProfile);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
+                                });
+                            }
+                            catch (Exception e) {
+                                synchronized (runnables) {
+                                    runnables.remove(playerName);
                                 }
-                            });
+
+                                getLogger().severe("Error when fetching " + playerName + "'s uuid from mojang: " +
+                                        e.getMessage());
+                            }
                         }
-                        catch (Exception e) {
-                            runnables.remove(playerName);
-
-                            getLogger().severe("Error when fetching " + playerName + "'s uuid from mojang: " +
-                                    e.getMessage());
-                        }
-                    }
-                });
-
-                if (runnable != null && contactMojang) {
-                    if (!runnables.containsKey(playerName)) {
-                        runnables.put(playerName, new ArrayList<>());
-                    }
-
+                    });
+                } else if (runnable != null && contactMojang) {
                     runnables.get(playerName).add(runnable);
                 }
-
-                return null;
             }
+
+            return null;
         }
 
         return ReflectionManager.getGameProfile(null, origName);
@@ -811,6 +864,7 @@ public class DisguiseUtilities {
         }
 
         GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
 
         gsonBuilder.registerTypeAdapter(MetaIndex.class, new SerializerMetaIndex());
         gsonBuilder.registerTypeAdapter(WrappedGameProfile.class, new SerializerGameProfile());
@@ -1318,6 +1372,15 @@ public class DisguiseUtilities {
 
         return list.toArray(new String[0]);
     }*/
+    public static String quote(String string) {
+        if (!string.contains(" ") && !string.startsWith("\"") && !string.endsWith("\"")) {
+            return string;
+        }
+
+        return "\"" + string.replaceAll("\\B\"", "\\\"").replaceAll("\\\\(?=\\\\*\"\\B)", "\\\\")
+                .replaceAll("(?=\"\\B)", "\\") + "\"";
+    }
+
     public static String[] split(String string) {
         // Regex where we first match any character that isn't a slash, if it is a slash then it must not have more
         // slashes until it hits the quote

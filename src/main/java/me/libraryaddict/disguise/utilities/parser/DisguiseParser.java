@@ -1,6 +1,7 @@
 package me.libraryaddict.disguise.utilities.parser;
 
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.google.gson.Gson;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
@@ -14,9 +15,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.potion.PotionEffectType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,6 +29,205 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 public class DisguiseParser {
+    private static HashMap<Method, Map.Entry<Method, Object>> defaultWatcherValues = new HashMap<>();
+
+    public static void createDefaultMethods() {
+        try {
+            for (DisguiseType type : DisguiseType.values()) {
+                Disguise disguise;
+
+                if (type.isMisc()) {
+                    disguise = new MiscDisguise(type);
+                } else if (type.isMob()) {
+                    disguise = new MobDisguise(type);
+                } else {
+                    disguise = new PlayerDisguise("Foobar");
+                }
+
+                FlagWatcher watcher = type.getWatcherClass().getConstructor(Disguise.class).newInstance(disguise);
+
+                Method[] methods = ParamInfoManager.getDisguiseWatcherMethods(watcher.getClass());
+
+                for (Method setMethod : methods) {
+                    // Invalidate methods that can't be handled normally
+                    if (setMethod.getName().equals("addPotionEffect") || (setMethod.getName().equals("setSkin") &&
+                            setMethod.getParameterTypes()[0] == String.class) ||
+                            (setMethod.getName().equals("setTarget") &&
+                                    setMethod.getParameterTypes()[0] != int.class) ||
+                            (setMethod.getName().equals("setItemInMainHand") &&
+                                    setMethod.getParameterTypes()[0] == Material.class)) {
+                        continue;
+                    }
+
+                    String getName = setMethod.getName().substring(3); // Remove 'set'
+
+                    if (getName.equals("HasNectar")) {
+                        getName = "hasNectar";
+                    } else if (getName.equals("HasStung")) {
+                        getName = "hasStung";
+                    } else if (setMethod.getParameterTypes()[0].isAssignableFrom(boolean.class)) {
+                        getName = "is" + getName;
+                    } else {
+                        getName = "get" + getName;
+                    }
+
+                    Method getMethod = null;
+
+                    for (Method m : setMethod.getDeclaringClass().getDeclaredMethods()) {
+                        if (!m.getName().equals(getName)) {
+                            continue;
+                        }
+
+                        if (m.getParameterTypes().length > 0 || m.getReturnType() != setMethod.getParameterTypes()[0]) {
+                            continue;
+                        }
+
+                        getMethod = m;
+                        break;
+                    }
+
+                    if (getMethod == null) {
+                        DisguiseUtilities.getLogger().severe(String
+                                .format("No such method '%s' when looking for the companion of '%s' in '%s'", getName,
+                                        setMethod.getName(), setMethod.getDeclaringClass().getSimpleName()));
+                        continue;
+                    }
+
+                    Object defaultValue = null;
+
+                    // Value is randomish so shouldn't be checked, should always specify value when setting
+                    if (!setMethod.isAnnotationPresent(RandomDefaultValue.class)) {
+                        Object invokeWith = watcher;
+
+                        if (!FlagWatcher.class.isAssignableFrom(getMethod.getDeclaringClass())) {
+                            invokeWith = disguise;
+                        }
+
+                        defaultValue = getMethod.invoke(invokeWith);
+                    }
+
+                    addWatcherDefault(setMethod, getMethod, defaultValue);
+                }
+            }
+        }
+        catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String parseToString(Disguise disguise) {
+        return parseToString(disguise, true);
+    }
+
+    /**
+     * Not outputting skin information is not garanteed to display the correct player name
+     */
+    public static String parseToString(Disguise disguise, boolean outputSkinData) {
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.append(disguise.getType().name());
+
+            if (disguise.isPlayerDisguise()) {
+                stringBuilder.append(" ").append(((PlayerDisguise) disguise).getName());
+            }
+
+            for (Method m : ParamInfoManager.getDisguiseWatcherMethods(disguise.getType().getWatcherClass())) {
+                // Special handling for this method
+                if (m.getName().equals("addPotionEffect")) {
+                    PotionEffectType[] types = (PotionEffectType[]) m.getDeclaringClass().getMethod("getPotionEffects")
+                            .invoke(disguise.getWatcher());
+
+                    for (PotionEffectType type : types) {
+                        if (type == null) {
+                            continue;
+                        }
+
+                        stringBuilder.append(" ").append(m.getName()).append(" ").append(type.getName());
+                    }
+                } else {
+                    Entry<Method, Object> entry = defaultWatcherValues.get(m);
+
+                    if (entry == null) {
+                        continue;
+                    }
+
+                    Object invokeWith = m.getDeclaringClass().isInstance(disguise) ? disguise : disguise.getWatcher();
+
+                    Object ourValue = entry.getKey().invoke(invokeWith);
+
+                    // Escape a hacky fix for custom names, disguised players with custom names don't want to show it
+                    // so it was set to an empty string.
+                    if ("".equals(ourValue) && m.getName().equals("setCustomName")) {
+                        ourValue = null;
+                    }
+
+                    if (m.getName().equals("setSkin") && !outputSkinData) {
+                        PlayerDisguise pDisg = (PlayerDisguise) disguise;
+                        ourValue = pDisg.getName();
+
+                        if (pDisg.getSkin() != null) {
+                            ourValue = pDisg.getSkin();
+                        } else if (pDisg.getGameProfile() != null && pDisg.getGameProfile().getName() != null) {
+                            ourValue = pDisg.getGameProfile().getName();
+                        }
+
+                        if (ourValue.equals(pDisg.getName())) {
+                            continue;
+                        }
+                    } else {
+                        // If its the same as default, continue
+                        if (!m.isAnnotationPresent(RandomDefaultValue.class) &&
+                                Objects.deepEquals(entry.getValue(), ourValue)) {
+                            continue;
+                        }
+                    }
+
+                    stringBuilder.append(" ").append(m.getName());
+
+                    if (ourValue instanceof Boolean && (Boolean) ourValue) {
+                        continue;
+                    }
+
+                    String valueString;
+
+                    if (ourValue != null) {
+                        valueString = ParamInfoManager.getParamInfo(ourValue.getClass()).toString(ourValue);
+
+                        valueString = DisguiseUtilities.quote(valueString);
+                    } else {
+                        valueString = "null";
+                    }
+
+                    stringBuilder.append(" ").append(valueString);
+                }
+            }
+
+            return stringBuilder.toString();
+        }
+        catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static void addWatcherDefault(Method setMethod, Method getMethod, Object object) {
+        Map.Entry<Method, Object> entry = new HashMap.SimpleEntry<>(getMethod, object);
+
+        if (defaultWatcherValues.containsKey(setMethod)) {
+            Object dObj = defaultWatcherValues.get(setMethod);
+
+            if (!Objects.deepEquals(defaultWatcherValues.get(setMethod).getValue(), object)) {
+                throw new IllegalStateException(String.format("%s has conflicting values!", setMethod.getName()));
+            }
+
+            return;
+        }
+
+        defaultWatcherValues.put(setMethod, entry);
+    }
+
     private static void doCheck(CommandSender sender, DisguisePermissions permissions, DisguisePerm disguisePerm,
             Collection<String> usedOptions) throws DisguiseParseException {
 
@@ -146,7 +349,7 @@ public class DisguiseParser {
         return !disguiseOptions.containsValue(true);
     }
 
-    public static String getName(Entity entity) {
+    public static String getName(CommandSender entity) {
         if (entity == null) {
             return "??";
         }
@@ -155,14 +358,16 @@ public class DisguiseParser {
             return entity.getName();
         }
 
-        if (entity.getCustomName() != null && entity.getCustomName().length() > 0) {
-            return entity.getCustomName();
+        if (entity instanceof Entity) {
+            if (((Entity) entity).getCustomName() != null && ((Entity) entity).getCustomName().length() > 0) {
+                return ((Entity) entity).getCustomName();
+            }
         }
 
         return entity.getName();
     }
 
-    public static String getSkin(CommandSender entity) {
+    private static String getSkin(CommandSender entity) {
         if (entity == null) {
             return "??";
         }
@@ -171,7 +376,6 @@ public class DisguiseParser {
             WrappedGameProfile gameProfile = ReflectionManager.getGameProfile((Player) entity);
 
             if (gameProfile != null) {
-
                 return DisguiseUtilities.getGson().toJson(gameProfile);
             }
         }
@@ -179,32 +383,61 @@ public class DisguiseParser {
         return "{}";
     }
 
+    public static String[] parsePlaceholders(String[] args, CommandSender user, CommandSender target) {
+        return parsePlaceholders(args, getName(user), getSkin(user), getName(target), DisguiseParser.getSkin(target),
+                getEntityEquipment(user), getEntityEquipment(target));
+    }
+
+    private static EntityEquipment getEntityEquipment(CommandSender entity) {
+        return entity instanceof LivingEntity ? ((LivingEntity) entity).getEquipment() : null;
+    }
+
     public static String[] parsePlaceholders(String[] args, String userName, String userSkin, String targetName,
-            String targetSkin) {
+            String targetSkin, EntityEquipment equip, EntityEquipment targetEquip) {
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
 
-            if (arg.contains("%user-name%")) {
-                arg = arg.replace("%user-name%", userName);
-            }
+            arg = replace(arg, "%user-name%", userName);
+            arg = replace(arg, "%user-skin%", userSkin);
+            arg = replace(arg, "%target-name%", targetName);
+            arg = replace(arg, "%target-skin%", targetSkin);
+            arg = replace(arg, "%held-item%", equip == null ? null : equip.getItemInMainHand());
+            arg = replace(arg, "%offhand-item%", equip == null ? null : equip.getItemInOffHand());
+            arg = replace(arg, "%armor%", equip == null ? null : equip.getArmorContents());
+            arg = replace(arg, "%helmet%", equip == null ? null : equip.getHelmet());
+            arg = replace(arg, "%chestplate%", equip == null ? null : equip.getChestplate());
+            arg = replace(arg, "%leggings%%", equip == null ? null : equip.getLeggings());
+            arg = replace(arg, "%boots%", equip == null ? null : equip.getBoots());
 
-            if (arg.contains("%user-skin%")) {
-                arg = arg.replace("%user-skin%", userSkin);
-            }
-
-            if (arg.contains("%target-name%")) {
-                arg = arg.replace("%target-name%", targetName);
-            }
-
-            if (arg.contains("%target-skin%")) {
-                arg = arg.replace("%target-skin%", targetSkin);
-            }
+            arg = replace(arg, "%target-held-item%", targetEquip == null ? null : targetEquip.getItemInMainHand());
+            arg = replace(arg, "%target-offhand-item%", targetEquip == null ? null : targetEquip.getItemInOffHand());
+            arg = replace(arg, "%target-armor%", targetEquip == null ? null : targetEquip.getArmorContents());
+            arg = replace(arg, "%target-helmet%", targetEquip == null ? null : targetEquip.getHelmet());
+            arg = replace(arg, "%target-chestplate%", targetEquip == null ? null : targetEquip.getChestplate());
+            arg = replace(arg, "%target-leggings%%", targetEquip == null ? null : targetEquip.getLeggings());
+            arg = replace(arg, "%target-boots%", targetEquip == null ? null : targetEquip.getBoots());
 
             args[i] = arg;
         }
 
         return args;
+    }
+
+    private static String replace(String string, String value, Object toReplace) {
+        if (!string.contains(value)) {
+            return string;
+        }
+
+        String oValue;
+
+        if (toReplace != null) {
+            oValue = ParamInfoManager.toString(toReplace);
+        } else {
+            oValue = "null";
+        }
+
+        return string.replace(value, oValue);
     }
 
     public static long parseStringToTime(String string) throws DisguiseParseException {
@@ -265,7 +498,7 @@ public class DisguiseParser {
 
         String skin = "{\"id\":\"a149f81bf7844f8987c554afdd4db533\",\"name\":\"libraryaddict\"," + "\"properties\":[]}";
         // Fill in fake data
-        args = parsePlaceholders(args, "libraryaddict", skin, "libraryaddict", skin);
+        args = parsePlaceholders(args, "libraryaddict", skin, "libraryaddict", skin, null, null);
 
         // Parse disguise
         return parseDisguise(sender, null, permNode, args, permissions);
@@ -343,7 +576,7 @@ public class DisguiseParser {
                 args = DisguiseUtilities.split(customDisguise.getValue());
             }
 
-            args = parsePlaceholders(args, sender.getName(), getSkin(sender), getName(target), getSkin(target));
+            args = parsePlaceholders(args, sender, target);
 
             if (disguisePerm == null) {
                 throw new DisguiseParseException(LibsMsg.PARSE_DISG_NO_EXIST, args[0]);

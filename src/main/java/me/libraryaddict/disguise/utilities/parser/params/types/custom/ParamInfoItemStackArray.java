@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities.parser.params.types.custom;
 
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedHashSet;
@@ -37,7 +38,43 @@ public class ParamInfoItemStackArray extends ParamInfoItemStack {
     }
 
     @Override
+    public String toString(Object object) {
+        ItemStack[] stacks = (ItemStack[]) object;
+
+        String returns = "";
+
+        for (int i = 0; i < stacks.length; i++) {
+            if (i > 0) {
+                returns += ",";
+            }
+
+            if (stacks[i] == null) {
+                continue;
+            }
+
+            String toString = super.toString(stacks[i]);
+
+            // If we can't parse to simple
+            if (toString.startsWith("{")) {
+                return DisguiseUtilities.getGson().toJson(object);
+            }
+
+            returns += toString;
+        }
+
+        return returns;
+    }
+
+    @Override
     public Object fromString(String string) {
+        if (string.startsWith("{") && string.endsWith("}")) {
+            try {
+                return DisguiseUtilities.getGson().fromJson(string, ItemStack[].class);
+            }
+            catch (Exception ex) {
+            }
+        }
+
         String[] split = string.split(",", -1);
 
         if (split.length != 4) {

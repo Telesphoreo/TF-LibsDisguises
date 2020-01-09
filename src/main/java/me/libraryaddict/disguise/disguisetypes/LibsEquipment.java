@@ -1,9 +1,12 @@
-package me.libraryaddict.disguise.disguisetypes; // Its here so I can make use of flagWatcher.sendItemStack() which is protected
+package me.libraryaddict.disguise.disguisetypes; // Its here so I can make use of flagWatcher.sendItemStack() which
+// is protected
 
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+
+import java.io.Serializable;
 
 public class LibsEquipment implements EntityEquipment {
     private ItemStack[] equipment = new ItemStack[EquipmentSlot.values().length];
@@ -11,6 +14,16 @@ public class LibsEquipment implements EntityEquipment {
 
     public LibsEquipment(FlagWatcher flagWatcher) {
         this.flagWatcher = flagWatcher;
+    }
+
+    public void setEquipment(EntityEquipment equipment) {
+        if (equipment == null) {
+            return;
+        }
+
+        setArmorContents(equipment.getArmorContents());
+        setItemInMainHand(equipment.getItemInMainHand());
+        setItemInOffHand(equipment.getItemInOffHand());
     }
 
     protected void setFlagWatcher(FlagWatcher flagWatcher) {
