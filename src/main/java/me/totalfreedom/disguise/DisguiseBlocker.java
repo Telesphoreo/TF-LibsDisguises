@@ -18,6 +18,7 @@ public class DisguiseBlocker {
     private static Function<Player, Boolean> adminProvider;
     public static boolean enabled = true;
     private static final List<DisguiseType> forbiddenDisguises = Arrays.asList(
+            DisguiseType.FISHING_HOOK,
             DisguiseType.ITEM_FRAME,
             DisguiseType.ENDER_DRAGON,
             DisguiseType.PLAYER,
@@ -28,8 +29,7 @@ public class DisguiseBlocker {
             DisguiseType.DROPPED_ITEM,
             DisguiseType.ENDER_CRYSTAL,
             DisguiseType.AREA_EFFECT_CLOUD,
-            DisguiseType.WITHER,
-            DisguiseType.PHANTOM
+            DisguiseType.WITHER
     );
 
     public static Plugin getTFM() {
@@ -37,7 +37,6 @@ public class DisguiseBlocker {
         if (tfm == null) {
             logger.warning("Could not resolve plugin: TotalFreedomMod");
         }
-
         return tfm;
     }
 
@@ -67,17 +66,8 @@ public class DisguiseBlocker {
         return adminProvider.apply(player);
     }
 
-    public static boolean isAllowed(Disguise disguise) {
-        return isAllowed(disguise.getType());
-
-    }
-
     public static boolean isAllowed(DisguiseType type) {
-        if (forbiddenDisguises.contains(type)) {
-            return false;
-        }
-
-        return true;
+        return !forbiddenDisguises.contains(type);
     }
 
     public static boolean isAllowed(Disguise disguise, Player player) {
@@ -85,9 +75,6 @@ public class DisguiseBlocker {
     }
 
     public static boolean isAllowed(DisguiseType type, Player player) {
-        if (forbiddenDisguises.contains(type) && !isAdmin(player)) {
-            return false;
-        }
-        return true;
+        return !forbiddenDisguises.contains(type) || isAdmin(player);
     }
 }
