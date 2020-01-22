@@ -8,6 +8,7 @@ import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
+import me.totalfreedom.disguise.DisguiseBlocker;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -86,7 +87,7 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length > 0) {
             if (args[0].equalsIgnoreCase("reload")) {
-                if (!sender.hasPermission("libsdisguises.reload")) {
+                if (!DisguiseBlocker.isAdmin(Bukkit.getPlayer(sender.getName()))) {
                     sender.sendMessage(LibsMsg.NO_PERM.get());
                     return true;
                 }
