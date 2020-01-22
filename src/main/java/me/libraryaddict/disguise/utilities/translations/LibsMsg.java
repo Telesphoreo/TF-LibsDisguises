@@ -115,7 +115,7 @@ public enum LibsMsg {
     PLEASE_WAIT(ChatColor.GRAY + "Please wait..."),
     INVALID_CLONE(ChatColor.DARK_RED + "Unknown option '%s' - Valid options are 'IgnoreEquipment' 'DoSneakSprint' " +
             "'DoSneak' 'DoSprint'"),
-    LIBS_RELOAD_WRONG(ChatColor.RED + "[LibsDisguises] Did you mean 'reload'?"),
+    LIBS_COMMAND_WRONG_ARG(ChatColor.RED + "[LibsDisguises] Did you mean 'reload', 'permtest' or 'metainfo'?"),
     LIMITED_RADIUS(ChatColor.RED + "Limited radius to %s! Don't want to make too much lag right?"),
     LISTEN_ENTITY_ENTITY_DISG_ENTITY(ChatColor.RED + "Disguised %s as a %s!"),
     LISTEN_ENTITY_ENTITY_DISG_ENTITY_FAIL(ChatColor.RED + "Failed to disguise %s as a %s!"),
@@ -201,7 +201,9 @@ public enum LibsMsg {
     SKIN_API_403("mineskin.org denied access to that url"),
     SKIN_API_404("mineskin.org unable to find an image at that url"),
     SKIN_API_IMAGE_TIMEOUT(ChatColor.RED + "Error! mineskin.org took too long to connect! Is your image valid?"),
-    SKIN_API_TIMEOUT(ChatColor.RED + "Error! Took too long to connect to mineskin.org!"),
+    SKIN_API_TIMEOUT_ERROR(ChatColor.RED + "Error! Took too long to connect to mineskin.org!"),
+    SKIN_API_TIMEOUT(ChatColor.RED + "Took too long to connect to mineskin.org!"),
+    SKIN_API_IMAGE_HAS_ERROR("Your image has the error: %s"),
     SKIN_API_USING_URL(ChatColor.GRAY + "Url provided, now attempting to connect to mineskin.org"),
     SKIN_API_BAD_FILE_NAME(ChatColor.RED + "Invalid file name provided! File not found!"),
     SKIN_API_BAD_FILE(ChatColor.RED + "Invalid file provided! Please ensure it is a valid .png skin!"),
@@ -220,7 +222,8 @@ public enum LibsMsg {
             "Means '/savedisguise Notch player Notch setsneaking'"),
     SAVE_DISG_HELP_5(ChatColor.GREEN + "Remember! You can upload your own skins, then reference those skins!"),
     GRAB_DISG_HELP_1(ChatColor.GREEN +
-            "You can choose a name to save the skins under, the names will be usable as if it was an actual player skin"),
+            "You can choose a name to save the skins under, the names will be usable as if it was an actual player " +
+            "skin"),
     GRAB_DISG_HELP_2(ChatColor.DARK_GREEN + "/grabskin https://somesite.com/myskin.png <Optional Name>"),
     GRAB_DISG_HELP_3(ChatColor.DARK_GREEN + "/grabskin myskin.png <Optional Name> - Skins must be in the folder!"),
     GRAB_DISG_HELP_4(ChatColor.DARK_GREEN + "/grabskin <Player name or UUID> <Optional Name>"),
@@ -229,7 +232,21 @@ public enum LibsMsg {
     CUSTOM_DISGUISE_NAME_CONFLICT(
             ChatColor.RED + "Cannot create the custom disguise '%s' as there is a name conflict!"),
     ERROR_LOADING_CUSTOM_DISGUISE(ChatColor.RED + "Error while loading custom disguise '%s'%s"),
-    SKIN_API_INTERNAL_ERROR(ChatColor.RED + "Internal error in the skin API, perhaps bad data?");
+    SKIN_API_INTERNAL_ERROR(ChatColor.RED + "Internal error in the skin API, perhaps bad data?"),
+    META_INFO(ChatColor.GREEN + "Name: %s, Watcher: %s, Index: %s, Type: %s, Default: %s"),
+    META_NOT_FOUND(ChatColor.RED + "No meta exists under that name!"),
+    META_VALUES(ChatColor.BLUE + "Metas: " + ChatColor.DARK_AQUA),
+    META_VALUE_SEPERATOR(ChatColor.AQUA + ", " + ChatColor.DARK_AQUA),
+    META_CLICK_SHOW(ChatColor.GOLD + "Click to show %s"),
+    LIBS_PERM_CHECK_INFO_1(ChatColor.AQUA + "Now checking for the permission 'libsdisguises.disguise.pig'"),
+    LIBS_PERM_CHECK_INFO_2(ChatColor.AQUA +
+            "If you did not give this permission, please set it. You can supply a player name to test another player."),
+    NORMAL_PERM_CHECK_SUCCESS(ChatColor.GOLD + "Normal permission check, success."),
+    NORMAL_PERM_CHECK_FAIL(ChatColor.RED + "Normal permission check, fail."),
+    LIBS_PERM_CHECK_SUCCESS(
+            ChatColor.GOLD + "Lib's Disguises permission check, success. Pig disguise should be usable!"),
+    LIBS_PERM_CHECK_FAIL(
+            ChatColor.GOLD + "Lib's Disguises permission check, fail. Your permission plugin isn't compliant!");
 
     private String string;
 

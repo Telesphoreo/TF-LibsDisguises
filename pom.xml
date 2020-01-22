@@ -5,7 +5,7 @@
     <!-- A good example on why temporary names for project identification shouldn't be used -->
     <groupId>LibsDisguises</groupId>
     <artifactId>LibsDisguises</artifactId>
-    <version>9.8.9-SNAPSHOT-TF</version>
+    <version>9.9.0</version>
 
     <build>
         <defaultGoal>clean install</defaultGoal>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.5.1-SNAPSHOT</version>
+            <version>4.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>

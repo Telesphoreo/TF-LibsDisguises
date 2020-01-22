@@ -334,6 +334,21 @@ public class DisguiseListener implements Listener {
                 }
             }
         }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!event.getPlayer().isOnline()) {
+                    return;
+                }
+
+                DisguiseUtilities.registerNoName(event.getPlayer().getScoreboard());
+
+                if (event.getPlayer().getScoreboard() != Bukkit.getScoreboardManager().getMainScoreboard()) {
+                    DisguiseUtilities.registerExtendedNames(event.getPlayer().getScoreboard());
+                }
+            }
+        }.runTaskLater(LibsDisguises.getInstance(), 20);
     }
 
     /**
@@ -537,8 +552,9 @@ public class DisguiseListener implements Listener {
             }
 
             try {
-                DisguiseParser.callMethods(p, disguise, perms, disguisePerm, new ArrayList<>(Arrays.asList(options)),
-                        options);
+                DisguiseParser
+                        .callMethods(p, disguise, perms, disguisePerm, new ArrayList<>(Arrays.asList(options)), options,
+                                "DisguiseModifyEntity");
                 p.sendMessage(LibsMsg.LISTENER_MODIFIED_DISG.get());
             }
             catch (DisguiseParseException ex) {
