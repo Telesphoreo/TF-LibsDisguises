@@ -246,37 +246,27 @@ public class DisguiseParser {
 
     private static HashMap<String, Boolean> getDisguiseOptions(CommandSender sender, String permNode,
             DisguisePerm type) {
-        switch (type.getType()) {
-            case PLAYER:
-            case FALLING_BLOCK:
-            case PAINTING:
-            case SPLASH_POTION:
-            case FISHING_HOOK:
-            case DROPPED_ITEM:
-                HashMap<String, Boolean> returns = new HashMap<>();
+        HashMap<String, Boolean> returns = new HashMap<>();
 
-                String beginning = "libsdisguises.options." + permNode.toLowerCase() + ".";
+        String beginning = "libsdisguises.options." + permNode.toLowerCase() + ".";
 
-                for (PermissionAttachmentInfo permission : sender.getEffectivePermissions()) {
-                    String lowerPerm = permission.getPermission().toLowerCase();
+        for (PermissionAttachmentInfo permission : sender.getEffectivePermissions()) {
+            String lowerPerm = permission.getPermission().toLowerCase();
 
-                    if (lowerPerm.startsWith(beginning)) {
-                        String[] split = lowerPerm.substring(beginning.length()).split("\\.");
+            if (lowerPerm.startsWith(beginning)) {
+                String[] split = lowerPerm.substring(beginning.length()).split("\\.");
 
-                        if (split.length > 1) {
-                            if (split[0].replace("_", "").equals(type.toReadable().toLowerCase().replace(" ", ""))) {
-                                for (int i = 1; i < split.length; i++) {
-                                    returns.put(split[i], permission.getValue());
-                                }
-                            }
+                if (split.length > 1) {
+                    if (split[0].replace("_", "").equals(type.toReadable().toLowerCase().replace(" ", ""))) {
+                        for (int i = 1; i < split.length; i++) {
+                            returns.put(split[i], permission.getValue());
                         }
                     }
                 }
-
-                return returns;
-            default:
-                return new HashMap<>();
+            }
         }
+
+        return returns;
     }
 
     public static DisguisePerm getDisguisePerm(String name) {
@@ -732,7 +722,7 @@ public class DisguiseParser {
             DisguiseParseException {
         Method[] methods = ParamInfoManager.getDisguiseWatcherMethods(disguise.getWatcher().getClass());
         List<String> list = new ArrayList<>(Arrays.asList(args));
-        HashMap<String, Boolean> disguiseOptions = null;
+        HashMap<String, Boolean> disguiseOptions = getDisguiseOptions(sender, permNode, disguisePerm);
 
         for (int argIndex = 0; argIndex < args.length; argIndex++) {
             // This is the method name they provided
@@ -797,14 +787,7 @@ public class DisguiseParser {
                 usedOptions.add(methodToUse.getName().toLowerCase());
             }
 
-            if (methodToUse.getName().equalsIgnoreCase("setpainting") ||
-                    methodToUse.getName().equalsIgnoreCase("setpotionid") ||
-                    methodToUse.getName().equalsIgnoreCase("setitemstack") ||
-                    methodToUse.getName().equalsIgnoreCase("setblock")) {
-                if (disguiseOptions == null) {
-                    disguiseOptions = getDisguiseOptions(sender, permNode, disguisePerm);
-                }
-
+            if (!disguiseOptions.isEmpty()) {
                 String stringValue = ParamInfoManager.toString(valueToSet);
 
                 if (!hasPermissionOption(disguiseOptions, stringValue)) {
