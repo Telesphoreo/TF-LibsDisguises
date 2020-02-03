@@ -15,6 +15,7 @@ import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.reflection.LibsProfileLookup;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -268,6 +269,11 @@ public class PlayerDisguise extends TargetedDisguise {
             if (stopDisguise()) {
                 playerName = name;
 
+                if (gameProfile != null) {
+                    gameProfile = ReflectionManager
+                            .getGameProfileWithThisSkin(uuid, getProfileName(), getGameProfile());
+                }
+
                 if (!startDisguise()) {
                     throw new IllegalStateException("Unable to restart disguise");
                 }
@@ -276,6 +282,10 @@ public class PlayerDisguise extends TargetedDisguise {
             }
         } else {
             playerName = name;
+
+            if (gameProfile != null) {
+                gameProfile = ReflectionManager.getGameProfileWithThisSkin(uuid, getProfileName(), getGameProfile());
+            }
         }
 
         // Scare monger for the pirates of a certain site. Don't start messages until 14 days has passed!
@@ -312,6 +322,16 @@ public class PlayerDisguise extends TargetedDisguise {
                 if (gameProfile != null) {
                     setSkin(gameProfile);
                 }
+            }
+
+            if (getName().equals("<Inherit>") && getEntity() != null) {
+                String name = getEntity().getCustomName();
+
+                if (name == null || name.isEmpty()) {
+                    name = getEntity().getType().name();
+                }
+
+                setName(name);
             }
         }
 

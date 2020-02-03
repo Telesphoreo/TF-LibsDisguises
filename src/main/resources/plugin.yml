@@ -24,6 +24,10 @@ commands:
       aliases: [dhelp, dishelp]
       permission: libsdisguises.seecmd.disguisehelp
       description: Help command for LibsDisguises.
+    disguiseplayer:
+      aliases: [dplayer, displayer]
+      permission: libsdisguises.seecmd.disguiseplayer
+      description: Disguise another player as an entity.
     disguiseradius:
       aliases: [disradius, dradius]
       permission: libsdisguises.seecmd.disguiseradius
@@ -36,6 +40,10 @@ commands:
       aliases: [undisentity, undentity]
       permission: libsdisguises.seecmd.undisguiseentity
       description: Undisguise an entity.
+    undisguiseplayer:
+      aliases: [undisplayer, undplayer]
+      permission: libsdisguises.seecmd.undisguiseplayer
+      description: Undisguise a player.
     undisguiseradius:
       aliases: [undisradius, undradius]
       permission: libsdisguises.seecmd.undisguiseradius
@@ -72,6 +80,10 @@ commands:
       aliases: [uploadskin, skin]
       permission: libsdisguises.seecmd.grabskin
       description: Grab a skin from file, url or player name/uuid
+    savedisguise:
+      aliases: [customdisguise, savedisg, customdisg, createdisguise, createdisg]
+      permission: libsdisguises.seecmd.savedisguise
+      description: Save a custom disguise to disguises.yml
 
 permissions:
     libsdisguises.reload:
@@ -80,6 +92,15 @@ permissions:
     libsdisguises.seethrough:
         description: Allows player to see through disguises.
         default: false
+    libsdisguises.pve:
+      description: Allows player to ignore pve restrictions.
+      default: false
+    libsdisguises.hidename:
+      description: Allows player to ignore name being forced above disguise
+      default: false
+    libsdisguises.pvp:
+      description: Allows player to ignore pvp restrictions.
+      default: false
     libsdisguises.seecmd:
       description: See all commands in tab-completion
       default: true
