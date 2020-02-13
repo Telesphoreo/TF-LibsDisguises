@@ -14,21 +14,18 @@ import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.TargetedDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.UpdateChecker;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -65,6 +62,11 @@ public class DisguiseListener implements Listener {
         plugin = libsDisguises;
 
         runUpdateScheduler();
+
+        if (!LibsPremium.getPluginInformation().isPremium() ||
+                LibsPremium.getPluginInformation().getUserID().matches("[0-9]+")) {
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+        }
 
         if (!DisguiseConfig.isSaveEntityDisguises())
             return;
@@ -197,16 +199,20 @@ public class DisguiseListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onAttack(EntityDamageByEntityEvent event) {
-        if (event.getEntity() instanceof Player) {
-            if (DisguiseConfig.isDisguiseBlownWhenAttacked()) {
-                checkPlayerCanBlowDisguise((Player) event.getEntity());
-            }
-        }
-
         Entity attacker = event.getDamager();
 
         if (attacker instanceof Projectile && ((Projectile) attacker).getShooter() instanceof Player) {
             attacker = (Entity) ((Projectile) attacker).getShooter();
+        }
+
+        if (event.getEntityType() != EntityType.PLAYER && !(attacker instanceof Player)) {
+            return;
+        }
+
+        if (event.getEntity() instanceof Player) {
+            if (DisguiseConfig.isDisguiseBlownWhenAttacked()) {
+                checkPlayerCanBlowDisguise((Player) event.getEntity());
+            }
         }
 
         checkPlayerCanFight(event, attacker);
@@ -240,7 +246,7 @@ public class DisguiseListener implements Listener {
 
         if (!attacker.hasPermission("libsdisguises." + (pvp ? "pvp" : "pve")) &&
                 !attacker.hasPermission("libsdisguises." + (pvp ? "pvp" : "pve"))) {
-            if (!DisguiseConfig.isRetaliationCombat() || !canRetaliate(event.getEntity())) {
+            if (!DisguiseConfig.isRetaliationCombat() || !canRetaliate(attacker)) {
                 Disguise[] disguises = DisguiseAPI.getDisguises(attacker);
 
                 if (disguises.length > 0) {
@@ -268,10 +274,8 @@ public class DisguiseListener implements Listener {
         }
 
         if (!event.isCancelled() && DisguiseConfig.isRetaliationCombat()) {
-            if (canRetaliate(event.getEntity())) {
-                setRetaliation(event.getEntity());
-                setRetaliation(attacker);
-            }
+            setRetaliation(event.getEntity());
+            setRetaliation(attacker);
         }
     }
 

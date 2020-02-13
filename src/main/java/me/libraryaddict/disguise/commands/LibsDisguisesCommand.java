@@ -1,14 +1,16 @@
 package me.libraryaddict.disguise.commands;
 
+import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MetaIndex;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
+import me.libraryaddict.disguise.utilities.parser.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -18,7 +20,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -87,13 +93,66 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length > 0) {
             if (args[0].equalsIgnoreCase("reload")) {
-                if (!DisguiseBlocker.isAdmin(Bukkit.getPlayer(sender.getName()))) {
+                if (!sender.hasPermission("libsdisguises.reload")) {
                     sender.sendMessage(LibsMsg.NO_PERM.get());
                     return true;
                 }
 
                 DisguiseConfig.loadConfig();
                 sender.sendMessage(LibsMsg.RELOADED_CONFIG.get());
+                return true;
+            } else if (args[0].equalsIgnoreCase("scoreboard") || args[0].equalsIgnoreCase("board")) {
+                if (!sender.hasPermission("libsdisguises.scoreboardtest")) {
+                    sender.sendMessage(LibsMsg.NO_PERM.get());
+                    return true;
+                }
+
+                if (DisguiseConfig.getPushingOption() == DisguiseConfig.DisguisePushing.IGNORE_SCOREBOARD) {
+                    sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_DISABLED.get());
+                }
+
+                Player player;
+
+                if (args.length > 1) {
+                    player = Bukkit.getPlayer(args[1]);
+
+                    if (player == null) {
+                        sender.sendMessage(LibsMsg.CANNOT_FIND_PLAYER.get(args[1]));
+                        return true;
+                    }
+
+                    if (!DisguiseAPI.isDisguised(player)) {
+                        sender.sendMessage(LibsMsg.DMODPLAYER_NODISGUISE.get(player.getName()));
+                        return true;
+                    }
+                } else if (sender instanceof Player) {
+                    player = (Player) sender;
+
+                    if (!DisguiseAPI.isDisguised(player)) {
+                        sender.sendMessage(LibsMsg.NOT_DISGUISED.get());
+                        return true;
+                    }
+                } else {
+                    sender.sendMessage(LibsMsg.NO_CONSOLE.get());
+                    return true;
+                }
+
+                Scoreboard board = player.getScoreboard();
+
+                Team team = board.getEntryTeam(sender.getName());
+
+                if (team == null) {
+                    sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_NO_TEAM.get());
+                    return true;
+                }
+
+                if (team.getOption(Team.Option.COLLISION_RULE) != Team.OptionStatus.NEVER &&
+                        team.getOption(Team.Option.COLLISION_RULE) != Team.OptionStatus.FOR_OTHER_TEAMS) {
+                    sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_NO_TEAM_PUSH.get());
+                    return true;
+                }
+
+                sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_SUCCESS.get());
                 return true;
             } else if (args[0].equalsIgnoreCase("permtest")) {
                 if (!sender.hasPermission("libsdisguises.permtest")) {
@@ -128,6 +187,29 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
                     }
                 } else {
                     sender.sendMessage(LibsMsg.NORMAL_PERM_CHECK_FAIL.get());
+                }
+            } else if (args[0].equalsIgnoreCase("json") || args[0].equalsIgnoreCase("gson") ||
+                    args[0].equalsIgnoreCase("item") || args[0].equalsIgnoreCase("parse") ||
+                    args[0].equalsIgnoreCase("tostring")) {
+                if (!sender.hasPermission("libsdisguises.json")) {
+                    sender.sendMessage(LibsMsg.NO_PERM.get());
+                    return true;
+                }
+
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(LibsMsg.NO_CONSOLE.get());
+                    return true;
+                }
+
+                ItemStack item = ((Player) sender).getInventory().getItemInMainHand();
+
+                String gson = DisguiseUtilities.getGson().toJson(item);
+                String simple = ParamInfoManager.toString(item);
+
+                sendMessage(sender, LibsMsg.ITEM_SERIALIZED, gson);
+
+                if (!gson.equals(simple)) {
+                    sendMessage(sender, LibsMsg.ITEM_SIMPLE_STRING, simple);
                 }
             } else if (args[0].equalsIgnoreCase("metainfo") || args[0].equalsIgnoreCase("meta")) {
                 if (!sender.hasPermission("libsdisguises.metainfo")) {
@@ -178,6 +260,37 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
             }
         }
         return true;
+    }
+
+    private void sendMessage(CommandSender sender, LibsMsg prefix, String string) {
+        int start = 0;
+        int msg = 1;
+
+        ComponentBuilder builder = new ComponentBuilder("").appendLegacy(prefix.get());
+
+        while (start < string.length()) {
+            int end = Math.min(256, string.length() - start);
+
+            String sub = string.substring(start, start + end);
+
+            builder.append(" ");
+
+            if (string.length() <= 256) {
+                builder.appendLegacy(LibsMsg.CLICK_TO_COPY_DATA.get());
+            } else {
+                builder.reset();
+                builder.appendLegacy(LibsMsg.CLICK_COPY.get(msg));
+            }
+
+            start += end;
+
+            builder.event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, sub));
+            builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(LibsMsg.CLICK_TO_COPY_HOVER.get() + " " + msg).create()));
+            msg += 1;
+        }
+
+        sender.spigot().sendMessage(builder.create());
     }
 
     @Override

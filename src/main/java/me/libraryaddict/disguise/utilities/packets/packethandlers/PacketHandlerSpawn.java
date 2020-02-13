@@ -17,6 +17,7 @@ import me.libraryaddict.disguise.utilities.packets.IPacketHandler;
 import me.libraryaddict.disguise.utilities.packets.LibsPackets;
 import me.libraryaddict.disguise.utilities.packets.PacketsHandler;
 import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
+import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.Art;
 import org.bukkit.Location;
@@ -224,11 +225,15 @@ public class PacketHandlerSpawn implements IPacketHandler {
 
             packets.addPacket(spawnPlayer);
 
-            PacketContainer metaPacket = ProtocolLibrary.getProtocolManager()
-                    .createPacketConstructor(PacketType.Play.Server.ENTITY_METADATA, entityId, newWatcher, true)
-                    .createPacket(entityId, newWatcher, true);
+            if (ReflectionManager.isSupported(NmsVersion.v1_15)) {
+                PacketContainer metaPacket = ProtocolLibrary.getProtocolManager()
+                        .createPacketConstructor(PacketType.Play.Server.ENTITY_METADATA, entityId, newWatcher, true)
+                        .createPacket(entityId, newWatcher, true);
 
-            packets.addPacket(metaPacket);
+                packets.addPacket(metaPacket);
+            } else {
+                spawnPlayer.getDataWatcherModifier().write(0, newWatcher);
+            }
 
             if (!selfDisguise) {
                 // Teleport the player back to where he's supposed to be
@@ -248,7 +253,7 @@ public class PacketHandlerSpawn implements IPacketHandler {
                 packets.addDelayedPacket(teleportPacket, 3);
 
                 // Send a metadata packet
-                metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+                PacketContainer metaPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
 
                 newWatcher = DisguiseUtilities
                         .createSanitizedDataWatcher(WrappedDataWatcher.getEntityWatcher(disguisedEntity),
@@ -309,11 +314,15 @@ public class PacketHandlerSpawn implements IPacketHandler {
                     .createSanitizedDataWatcher(WrappedDataWatcher.getEntityWatcher(disguisedEntity),
                             disguise.getWatcher());
 
-            PacketContainer metaPacket = ProtocolLibrary.getProtocolManager()
-                    .createPacketConstructor(PacketType.Play.Server.ENTITY_METADATA, disguisedEntity.getEntityId(),
-                            newWatcher, true).createPacket(disguisedEntity.getEntityId(), newWatcher, true);
+            if (ReflectionManager.isSupported(NmsVersion.v1_15)) {
+                PacketContainer metaPacket = ProtocolLibrary.getProtocolManager()
+                        .createPacketConstructor(PacketType.Play.Server.ENTITY_METADATA, disguisedEntity.getEntityId(),
+                                newWatcher, true).createPacket(disguisedEntity.getEntityId(), newWatcher, true);
 
-            packets.addPacket(metaPacket);
+                packets.addPacket(metaPacket);
+            } else {
+                spawnEntity.getDataWatcherModifier().write(0, newWatcher);
+            }
         } else if (disguise.getType().isMisc()) {
             int data = ((MiscDisguise) disguise).getData();
             double x = loc.getX();
@@ -395,16 +404,24 @@ public class PacketHandlerSpawn implements IPacketHandler {
         boolean delayedArmor =
                 DisguiseConfig.isPlayerHideArmor() && (disguise.isPlayerDisguise() && disguisedEntity != observer) &&
                         disguisedEntity instanceof LivingEntity;
+
+        if (delayedArmor) {
+            packets.setSendArmor(true);
+            packets.setRemoveMetaAt(7);
+        }
         // This sends the armor packets so that the player isn't naked.
         if (DisguiseConfig.isEquipmentPacketsEnabled() || delayedArmor) {
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                 // Get what the disguise wants to show for its armor
-                ItemStack itemToSend = disguise.getWatcher().getItemStack(slot);
+                ItemStack itemToSend;
 
-                // If the disguise armor isn't visible
-                if (itemToSend == null || itemToSend.getType() == Material.AIR) {
-                    // If we need to send the natural armor if possible
-                    if (delayedArmor) {
+                if (delayedArmor) {
+                    itemToSend = new ItemStack(Material.AIR);
+                } else {
+                    itemToSend = disguise.getWatcher().getItemStack(slot);
+
+                    // If the disguise armor isn't visible
+                    if (itemToSend == null || itemToSend.getType() != Material.AIR) {
                         itemToSend = ReflectionManager.getEquipment(slot, disguisedEntity);
 
                         // If natural armor isn't sent either
@@ -412,14 +429,7 @@ public class PacketHandlerSpawn implements IPacketHandler {
                             continue;
                         }
                     } else {
-                        // We don't need to send natural armor and disguise armor isn't visible
-                        continue;
-                    }
-                } else if (!delayedArmor && disguisedEntity instanceof LivingEntity) {
-                    ItemStack item = ReflectionManager.getEquipment(slot, disguisedEntity);
-
-                    // If the item was going to be sent anyways
-                    if (item != null && item.getType() != Material.AIR) {
+                        // Its air which shouldn't be sent
                         continue;
                     }
                 }
@@ -432,12 +442,7 @@ public class PacketHandlerSpawn implements IPacketHandler {
                 mods.write(1, ReflectionManager.createEnumItemSlot(slot));
                 mods.write(2, ReflectionManager.getNmsItem(itemToSend));
 
-                if (delayedArmor) {
-                    packets.addDelayedPacket(packet, 7);
-                    packets.setRemoveMetaAt(7);
-                } else {
-                    packets.addDelayedPacket(packet);
-                }
+                packets.addDelayedPacket(packet);
             }
         }
     }

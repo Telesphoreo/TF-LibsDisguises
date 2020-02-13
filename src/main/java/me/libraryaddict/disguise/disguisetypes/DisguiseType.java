@@ -1,5 +1,7 @@
 package me.libraryaddict.disguise.disguisetypes;
 
+import me.libraryaddict.disguise.utilities.reflection.NmsAdded;
+import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Entity;
@@ -14,7 +16,7 @@ public enum DisguiseType {
 
     BAT,
 
-    BEE,
+    @NmsAdded(added = NmsVersion.v1_15) BEE,
 
     BLAZE,
 
@@ -255,7 +257,11 @@ public enum DisguiseType {
             }
         }
 
-        setEntityType(EntityType.valueOf(name()));
+        try {
+            setEntityType(EntityType.valueOf(name()));
+        }
+        catch (Exception ex) {
+        }
     }
 
     public int getDefaultData() {
@@ -272,6 +278,10 @@ public enum DisguiseType {
 
     public EntityType getEntityType() {
         return entityType;
+    }
+
+    private void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
 
     /**
@@ -300,6 +310,10 @@ public enum DisguiseType {
         return watcherClass;
     }
 
+    public void setWatcherClass(Class<? extends FlagWatcher> c) {
+        watcherClass = c;
+    }
+
     public boolean isMisc() {
         return getEntityType() != null && !getEntityType().isAlive();
     }
@@ -314,14 +328,6 @@ public enum DisguiseType {
 
     public boolean isUnknown() {
         return this == DisguiseType.UNKNOWN;
-    }
-
-    private void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
-    public void setWatcherClass(Class<? extends FlagWatcher> c) {
-        watcherClass = c;
     }
 
     public String toReadable() {

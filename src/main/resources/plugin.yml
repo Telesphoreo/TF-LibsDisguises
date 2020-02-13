@@ -10,7 +10,8 @@ depend: [ProtocolLib]
 api-version: 1.13
 commands:
     libsdisguises:
-      permission: libsdisguises.seecmd.libsdisguises
+      aliases: [libsdisg, ld]
+      #permission: libsdisguises.seecmd.libsdisguises
       description: Main command for libsdisguises.
     disguise:
       aliases: [d, dis]
@@ -24,6 +25,10 @@ commands:
       aliases: [dhelp, dishelp]
       permission: libsdisguises.seecmd.disguisehelp
       description: Help command for LibsDisguises.
+    disguiseplayer:
+      aliases: [dplayer, displayer]
+      permission: libsdisguises.seecmd.disguiseplayer
+      description: Disguise another player as an entity.
     disguiseradius:
       aliases: [disradius, dradius]
       permission: libsdisguises.seecmd.disguiseradius
@@ -36,6 +41,10 @@ commands:
       aliases: [undisentity, undentity]
       permission: libsdisguises.seecmd.undisguiseentity
       description: Undisguise an entity.
+    undisguiseplayer:
+      aliases: [undisplayer, undplayer]
+      permission: libsdisguises.seecmd.undisguiseplayer
+      description: Undisguise a player.
     undisguiseradius:
       aliases: [undisradius, undradius]
       permission: libsdisguises.seecmd.undisguiseradius
@@ -72,28 +81,40 @@ commands:
       aliases: [uploadskin, skin]
       permission: libsdisguises.seecmd.grabskin
       description: Grab a skin from file, url or player name/uuid
+    savedisguise:
+      aliases: [customdisguise, savedisg, customdisg, createdisguise, createdisg]
+      permission: libsdisguises.seecmd.savedisguise
+      description: Save a custom disguise to disguises.yml
 
 permissions:
     libsdisguises.reload:
-        description: Allows the user to reload LibsDisguises.
-        default: op
+      description: Allows the user to reload LibsDisguises.
     libsdisguises.seethrough:
-        description: Allows player to see through disguises.
-        default: false
-    libsdisguises.pve:
-      description: Allows player to ignore pve restrictions.
+      description: Allows player to see through disguises.
       default: false
     libsdisguises.hidename:
       description: Allows player to ignore name being forced above disguise
       default: false
+    libsdisguises.pve:
+      description: Allows player to ignore pve restrictions.
+      default: false
     libsdisguises.pvp:
       description: Allows player to ignore pvp restrictions.
       default: false
+    libsdisguises.permtest:
+      description: Allows player to test permissions
+    libsdisguises.metainfo:
+      description: Allows player to get meta info
+    libsdisguises.json:
+      description: Allows player to parse held item to json
+      default: true
+    libsdisguises.scoreboardtest:
+      description: Test if the scoreboard is valid, this is a simple test.
     libsdisguises.seecmd:
       description: See all commands in tab-completion
       default: true
       children:
-         libsdisguises.seecmd.libsdisguises: true
+         #libsdisguises.seecmd.libsdisguises: true
          libsdisguises.seecmd.disguise: true
          libsdisguises.seecmd.disguiseentity: true
          libsdisguises.seecmd.disguisehelp: true
