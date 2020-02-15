@@ -9,6 +9,7 @@ import me.libraryaddict.disguise.disguisetypes.RabbitType;
 import me.libraryaddict.disguise.utilities.parser.params.types.ParamInfoEnum;
 import me.libraryaddict.disguise.utilities.parser.params.types.base.*;
 import me.libraryaddict.disguise.utilities.parser.params.types.custom.*;
+import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
@@ -41,8 +42,12 @@ public class ParamInfoTypes {
 
         paramInfos.add(new ParamInfoEnum(Villager.Profession.class, "Villager Profession",
                 "View all the professions you can set on a Villager and Zombie Villager"));
-        paramInfos.add(new ParamInfoEnum(Villager.Type.class, "Villager Biome",
-                "View all the biomes you can set on a Villager and Zombie Villager"));
+
+        if (NmsVersion.v1_14.isSupported()) {
+            paramInfos.add(new ParamInfoEnum(Villager.Type.class, "Villager Biome",
+                    "View all the biomes you can set on a Villager and Zombie Villager"));
+        }
+
         paramInfos.add(new ParamInfoEnum(BlockFace.class, "Direction", "Direction (North, East, South, West, Up, Down)",
                 "View the directions usable on player setSleeping and shulker direction",
                 Arrays.copyOf(BlockFace.values(), 6)));
@@ -56,18 +61,27 @@ public class ParamInfoTypes {
                 "View all the colors you can use for a llama color"));
         paramInfos.add(new ParamInfoEnum(Parrot.Variant.class, "Parrot Variant",
                 "View the different colors a parrot can be"));
-        paramInfos.add(new ParamInfoParticle(WrappedParticle.class, "Particle", "The different particles of Minecraft",
-                Particle.values(), getMaterials()));
-        paramInfos.add(new ParamInfoEnum(TropicalFish.Pattern.class, "Pattern", "Patterns of a tropical fish"));
+
+        if (NmsVersion.v1_13.isSupported()) {
+            paramInfos.add(new ParamInfoParticle(WrappedParticle.class, "Particle",
+                    "The different particles of Minecraft", Particle.values(), getMaterials()));
+            paramInfos.add(new ParamInfoEnum(TropicalFish.Pattern.class, "Pattern", "Patterns of a tropical fish"));
+        } else {
+            paramInfos.add(new ParamInfoEnum(Particle.class, "Particle", "The different particles of Minecraft"));
+        }
+
         paramInfos.add(new ParamInfoEnum(DyeColor.class, "DyeColor", "Dye colors of many different colors"));
         paramInfos.add(new ParamInfoEnum(Horse.Style.class, "Horse Style",
                 "Horse style which is the patterns on the horse"));
-        paramInfos.add(new ParamInfoEnum(EntityPose.class, "EntityPose", "The pose the entity should strike"));
-        paramInfos.add(new ParamInfoEnum(Cat.Type.class, "Cat Type", "The type of cat"));
-        paramInfos.add(new ParamInfoEnum(Fox.Type.class, "Fox Type", "The type of fox"));
-        paramInfos.add(new ParamInfoEnum(Panda.Gene.class, "Panda Gene", "The panda gene type"));
-        paramInfos.add(new ParamInfoEnum(MushroomCow.Variant.class, "Mushroom Cow Variant",
-                "The different variants for mushroom cows"));
+
+        if (NmsVersion.v1_14.isSupported()) {
+            paramInfos.add(new ParamInfoEnum(EntityPose.class, "EntityPose", "The pose the entity should strike"));
+            paramInfos.add(new ParamInfoEnum(Cat.Type.class, "Cat Type", "The type of cat"));
+            paramInfos.add(new ParamInfoEnum(Fox.Type.class, "Fox Type", "The type of fox"));
+            paramInfos.add(new ParamInfoEnum(Panda.Gene.class, "Panda Gene", "The panda gene type"));
+            paramInfos.add(new ParamInfoEnum(MushroomCow.Variant.class, "Mushroom Cow Variant",
+                    "The different variants for mushroom cows"));
+        }
 
         // Register custom types
         paramInfos.add(new ParamInfoEulerAngle(EulerAngle.class, "Euler Angle", "Euler Angle (X,Y,Z)",
@@ -132,7 +146,7 @@ public class ParamInfoTypes {
         List<Material> list = new ArrayList<>();
 
         for (Material material : Material.values()) {
-            if (material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR) {
+            if (material.name().matches("([A-Z]+_)?AIR")) {
                 continue;
             }
 
