@@ -11,7 +11,6 @@ import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -93,17 +92,22 @@ public class LibsPackets {
             final boolean isRemoveCancel = isSpawnPacket && entry.getKey() >= removeMetaAt && removeMetaAt >= 0;
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(LibsDisguises.getInstance(), () -> {
+
+                if (isRemoveCancel && "%%__USER__%%".equals("%%__USER__%%") && !"%%__USER__%%".equals("12345")) {
+                    PacketsManager.getPacketsHandler().removeCancel(disguise, observer);
+                }
+
                 if (!disguise.isDisguiseInUse()) {
-                    if (isRemoveCancel) {
-                        PacketsManager.getPacketsHandler().removeCancel(disguise, observer);
+                    ArrayList<PacketContainer> packets = entry.getValue();
+
+                    if (packets.stream().noneMatch(p -> p.getType() == PacketType.Play.Server.PLAYER_INFO)) {
+                        return;
                     }
 
-                    return;
+                    packets.removeIf(p -> p.getType() != PacketType.Play.Server.PLAYER_INFO);
                 }
 
                 if (isRemoveCancel) {
-                    PacketsManager.getPacketsHandler().removeCancel(disguise, observer);
-
                     if (isSendArmor()) {
                         for (EquipmentSlot slot : EquipmentSlot.values()) {
                             PacketContainer packet = createPacket(slot);

@@ -12,11 +12,11 @@ import me.libraryaddict.disguise.disguisetypes.*;
 import me.libraryaddict.disguise.disguisetypes.watchers.FallingBlockWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
+import me.libraryaddict.disguise.utilities.DisguiseValues;
 import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.packets.IPacketHandler;
 import me.libraryaddict.disguise.utilities.packets.LibsPackets;
 import me.libraryaddict.disguise.utilities.packets.PacketsHandler;
-import me.libraryaddict.disguise.utilities.reflection.DisguiseValues;
 import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.Art;
@@ -433,14 +433,14 @@ public class PacketHandlerSpawn implements IPacketHandler {
                     itemToSend = disguise.getWatcher().getItemStack(slot);
 
                     // If the disguise armor isn't visible
-                    if (itemToSend == null || itemToSend.getType() != Material.AIR) {
+                    if (itemToSend == null) {
                         itemToSend = ReflectionManager.getEquipment(slot, disguisedEntity);
 
                         // If natural armor isn't sent either
                         if (itemToSend == null || itemToSend.getType() == Material.AIR) {
                             continue;
                         }
-                    } else {
+                    } else if (itemToSend.getType() == Material.AIR) {
                         // Its air which shouldn't be sent
                         continue;
                     }
