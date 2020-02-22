@@ -5,7 +5,7 @@
     <!-- A good example on why temporary names for project identification shouldn't be used -->
     <groupId>LibsDisguises</groupId>
     <artifactId>LibsDisguises</artifactId>
-    <version>9.9.6-SNAPSHOT-TF</version>
+    <version>9.9.7-SNAPSHOT</version>
 
     <build>
         <defaultGoal>exec:java clean install</defaultGoal>
@@ -49,32 +49,6 @@
                     <includePluginDependencies>true</includePluginDependencies>
                     <mainClass>me.libraryaddict.disguise.utilities.watchers.CompileMethods</mainClass>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.objectweb.asm</pattern>
-                                    <shadedPattern>me.libraryaddict.asm</shadedPattern>
-                                </relocation>
-                            </relocations>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.ow2.asm:asm</include>
-                                </includes>
-                            </artifactSet>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
