@@ -1,6 +1,8 @@
 package me.libraryaddict.disguise.utilities;
 
+import lombok.Getter;
 import me.libraryaddict.disguise.LibsDisguises;
+import me.libraryaddict.disguise.utilities.plugin.BisectHosting;
 import me.libraryaddict.disguise.utilities.plugin.PluginInformation;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -25,6 +27,8 @@ public class LibsPremium {
      * Information of the plugin used to activate premium, if exists
      */
     private static PluginInformation paidInformation;
+    @Getter
+    private static boolean bisectHosted;
 
     public static PluginInformation getPluginInformation() {
         return pluginInformation;
@@ -227,9 +231,17 @@ public class LibsPremium {
         }
 
         if (!foundJar) {
-            DisguiseUtilities.getLogger().warning(
-                    "If you own the plugin, place the premium jar downloaded from https://www.spigotmc" +
-                            ".org/resources/libs-disguises.32453/ in plugins/LibsDisguises/");
+            if (bisectHosted = new BisectHosting().isBisectHosted("LibsDisguises")) {
+                DisguiseUtilities.getLogger().info("Hosted by BisectHosting! Premium enabled!");
+
+                paidInformation = new PluginInformation("0", "32453", "0", true, "0", "#0", "0");
+
+                thisPluginIsPaidFor = true;
+            } else {
+                DisguiseUtilities.getLogger().warning(
+                        "If you own the plugin, place the premium jar downloaded from https://www.spigotmc" +
+                                ".org/resources/libs-disguises.32453/ in plugins/LibsDisguises/");
+            }
         }
     }
 

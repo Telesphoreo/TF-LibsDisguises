@@ -5,7 +5,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.utilities.packets.packethandlers.*;
-import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -34,10 +33,7 @@ public class PacketsHandler {
         packetHandlers.add(new PacketHandlerEntityStatus());
         packetHandlers.add(new PacketHandlerEquipment(this));
 
-        if (!NmsVersion.v1_14.isSupported()) {
-            packetHandlers.add(new PacketHandlerHeadRotation());
-        }
-
+        packetHandlers.add(new PacketHandlerHeadRotation());
         packetHandlers.add(new PacketHandlerMetadata(this));
         packetHandlers.add(new PacketHandlerMovement());
         packetHandlers.add(new PacketHandlerSpawn(this));

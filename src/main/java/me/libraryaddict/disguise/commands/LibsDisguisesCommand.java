@@ -8,13 +8,12 @@ import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MetaIndex;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
+import me.libraryaddict.disguise.utilities.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
-import me.libraryaddict.disguise.utilities.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -99,7 +98,7 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length > 0) {
             if (args[0].equalsIgnoreCase("reload")) {
-                if (!DisguiseBlocker.isAdmin(Bukkit.getPlayer(sender.getName()))) {
+                if (!sender.hasPermission("libsdisguises.reload")) {
                     sender.sendMessage(LibsMsg.NO_PERM.get());
                     return true;
                 }
@@ -107,7 +106,8 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
                 DisguiseConfig.loadConfig();
                 sender.sendMessage(LibsMsg.RELOADED_CONFIG.get());
                 return true;
-            } else if (args[0].equalsIgnoreCase("scoreboard") || args[0].equalsIgnoreCase("board")) {
+            } else if (args[0].equalsIgnoreCase("scoreboard") || args[0].equalsIgnoreCase("board") ||
+                    args[0].equalsIgnoreCase("teams")) {
                 if (!sender.hasPermission("libsdisguises.scoreboardtest")) {
                     sender.sendMessage(LibsMsg.NO_PERM.get());
                     return true;
@@ -154,11 +154,11 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
 
                 if (team.getOption(Team.Option.COLLISION_RULE) != Team.OptionStatus.NEVER &&
                         team.getOption(Team.Option.COLLISION_RULE) != Team.OptionStatus.FOR_OTHER_TEAMS) {
-                    sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_NO_TEAM_PUSH.get());
+                    sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_NO_TEAM_PUSH.get(team.getName()));
                     return true;
                 }
 
-                sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_SUCCESS.get());
+                sender.sendMessage(LibsMsg.LIBS_SCOREBOARD_SUCCESS.get(team.getName()));
                 return true;
             } else if (args[0].equalsIgnoreCase("permtest")) {
                 if (!sender.hasPermission("libsdisguises.permtest")) {
@@ -297,8 +297,8 @@ public class LibsDisguisesCommand implements CommandExecutor, TabCompleter {
 
                         sender.spigot().sendMessage(builder.create());
                     } else {
-                        sender.sendMessage(
-                                LibsMsg.META_VALUES_NO_CLICK.get(StringUtils.join(names, LibsMsg.META_VALUE_SEPERATOR.get())));
+                        sender.sendMessage(LibsMsg.META_VALUES_NO_CLICK
+                                .get(StringUtils.join(names, LibsMsg.META_VALUE_SEPERATOR.get())));
                     }
                 }
             } else {

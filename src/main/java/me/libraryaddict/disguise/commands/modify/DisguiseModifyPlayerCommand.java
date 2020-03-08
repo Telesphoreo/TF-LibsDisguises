@@ -1,6 +1,7 @@
-package me.libraryaddict.disguise.commands;
+package me.libraryaddict.disguise.commands.modify;
 
 import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.commands.DisguiseBaseCommand;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;

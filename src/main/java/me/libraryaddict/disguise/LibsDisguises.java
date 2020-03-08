@@ -1,6 +1,19 @@
 package me.libraryaddict.disguise;
 
-import me.libraryaddict.disguise.commands.*;
+import me.libraryaddict.disguise.commands.LibsDisguisesCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguiseCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguiseEntityCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguisePlayerCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguiseRadiusCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyEntityCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyPlayerCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyRadiusCommand;
+import me.libraryaddict.disguise.commands.undisguise.UndisguiseCommand;
+import me.libraryaddict.disguise.commands.undisguise.UndisguiseEntityCommand;
+import me.libraryaddict.disguise.commands.undisguise.UndisguisePlayerCommand;
+import me.libraryaddict.disguise.commands.undisguise.UndisguiseRadiusCommand;
+import me.libraryaddict.disguise.commands.utils.*;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
 import me.libraryaddict.disguise.utilities.metrics.MetricsInitalizer;
@@ -9,7 +22,6 @@ import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.reflection.asm.WatcherSanitizer;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -35,13 +47,13 @@ public class LibsDisguises extends JavaPlugin {
 
         if (!Bukkit.getServer().getWorlds().isEmpty()) {
             reloaded = true;
+            getLogger()
+                    .severe("Lib's Disguises was reloaded! Please do not report any bugs! This plugin can't handle " +
+                            "reloads gracefully!");
             return;
         }
 
         WatcherSanitizer.init();
-
-        getLogger().severe("Lib's Disguises was reloaded! Please do not report any bugs! This plugin can't handle " +
-                "reloads gracefully!");
     }
 
     @Override
@@ -66,6 +78,12 @@ public class LibsDisguises extends JavaPlugin {
         getLogger().info("Build Date: " + pluginYml.getString("build-date"));
 
         LibsPremium.check(getDescription().getVersion(), getFile());
+
+        if (!LibsPremium.isPremium()) {
+            getLogger()
+                    .info("You are running the free version, commands limited to non-players and operators. (Console," +
+                            " Command " + "Blocks, Admins)");
+        }
 
         if (ReflectionManager.getVersion() == null) {
             getLogger().severe("You're using the wrong version of Lib's Disguises for your server! This is " +
@@ -96,6 +114,8 @@ public class LibsDisguises extends JavaPlugin {
         if (!DisguiseConfig.isDisableCommands()) {
             registerCommand("disguise", new DisguiseCommand());
             registerCommand("undisguise", new UndisguiseCommand());
+            registerCommand("disguiseplayer", new DisguisePlayerCommand());
+            registerCommand("undisguiseplayer", new UndisguisePlayerCommand());
             registerCommand("undisguiseentity", new UndisguiseEntityCommand());
             registerCommand("disguiseentity", new DisguiseEntityCommand());
             registerCommand("disguiseradius", new DisguiseRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
@@ -110,6 +130,7 @@ public class LibsDisguises extends JavaPlugin {
                     new DisguiseModifyRadiusCommand(getConfig().getInt("DisguiseRadiusMax")));
             registerCommand("copydisguise", new CopyDisguiseCommand());
             registerCommand("grabskin", new GrabSkinCommand());
+            registerCommand("savedisguise", new SaveDisguiseCommand());
         } else {
             getLogger().info("Commands has been disabled, as per config");
         }
@@ -154,15 +175,6 @@ public class LibsDisguises extends JavaPlugin {
     @Deprecated
     public void reload() {
         DisguiseConfig.loadConfig();
-    }
-
-    /**
-     * Used for enabling/disabling disguises through TotalFreedomMod.
-     *
-     * @param enable The return status of whether disguises are enabled.
-     */
-    public void toggleUsability(boolean enable) {
-        DisguiseBlocker.enabled = enable;
     }
 
     public DisguiseListener getListener() {

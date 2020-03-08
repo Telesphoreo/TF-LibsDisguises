@@ -1,7 +1,8 @@
-package me.libraryaddict.disguise.commands;
+package me.libraryaddict.disguise.commands.disguise;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
+import me.libraryaddict.disguise.commands.DisguiseBaseCommand;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
@@ -27,6 +28,10 @@ public class DisguisePlayerCommand extends DisguiseBaseCommand implements TabCom
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (isNotPremium(sender)) {
+            return true;
+        }
+
         DisguisePermissions permissions = getPermissions(sender);
 
         if (!permissions.hasPermissions()) {

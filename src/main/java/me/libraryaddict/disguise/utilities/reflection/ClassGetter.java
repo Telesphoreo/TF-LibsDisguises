@@ -31,11 +31,11 @@ public class ClassGetter {
         if (src != null) {
             URL resource = src.getLocation();
 
-            if (resource.getPath().endsWith(".jar")) {
+            if (resource.getPath().toLowerCase().endsWith(".jar")) {
                 processJarfile(resource, pkgname, classes);
             } else {
                 for (File f : new File(resource.getPath() + "/" + pkgname.replace(".", "/")).listFiles()) {
-                    if (!f.getName().endsWith(".class")) {
+                    if (!f.getName().endsWith(".class") || f.getName().contains("$")) {
                         continue;
                     }
 

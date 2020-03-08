@@ -1,13 +1,20 @@
 package me.libraryaddict.disguise.commands;
 
+import me.libraryaddict.disguise.commands.disguise.DisguiseCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguiseEntityCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguisePlayerCommand;
+import me.libraryaddict.disguise.commands.disguise.DisguiseRadiusCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyEntityCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyPlayerCommand;
+import me.libraryaddict.disguise.commands.modify.DisguiseModifyRadiusCommand;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.utilities.LibsPremium;
+import me.libraryaddict.disguise.utilities.params.ParamInfo;
+import me.libraryaddict.disguise.utilities.params.ParamInfoManager;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePerm;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
-import me.libraryaddict.disguise.utilities.params.ParamInfo;
-import me.libraryaddict.disguise.utilities.params.ParamInfoManager;
-import me.totalfreedom.disguise.DisguiseBlocker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -40,6 +47,12 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
     }
 
     protected boolean isNotPremium(CommandSender sender) {
+        if (sender instanceof Player && !sender.isOp() &&
+                (!LibsPremium.isPremium() || LibsPremium.getPaidInformation() == LibsPremium.getPluginInformation())) {
+            sender.sendMessage(ChatColor.RED + "Please purchase Lib's Disguises to enable player commands");
+            return true;
+        }
+
         return false;
     }
 
@@ -204,9 +217,7 @@ public abstract class DisguiseBaseCommand implements CommandExecutor {
             if (type.isUnknown())
                 continue;
 
-            if (DisguiseBlocker.isAllowed(type.getType()) && !type.isUnknown()) {
-                allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
-            }
+            allowedDisguises.add(type.toReadable().replaceAll(" ", "_"));
         }
 
         return allowedDisguises;

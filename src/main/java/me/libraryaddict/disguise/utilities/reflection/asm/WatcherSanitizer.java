@@ -1,7 +1,7 @@
 package me.libraryaddict.disguise.utilities.reflection.asm;
 
+import com.google.gson.Gson;
 import me.libraryaddict.disguise.LibsDisguises;
-import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPluginLoader;
@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -24,9 +23,6 @@ public class WatcherSanitizer {
     public static void checkPreLoaded() throws NoSuchFieldException, IllegalAccessException {
         JavaPluginLoader javaLoader = (JavaPluginLoader) LibsDisguises.getInstance().getPluginLoader();
 
-        Field cM = JavaPluginLoader.class.getDeclaredField("classes");
-        cM.setAccessible(true);
-        Map<String, Class<?>> classes = (Map<String, Class<?>>) cM.get(javaLoader);
         Field lM = JavaPluginLoader.class.getDeclaredField("loaders");
         lM.setAccessible(true);
         List loaders = (List) lM.get(javaLoader);
@@ -38,15 +34,9 @@ public class WatcherSanitizer {
 
         for (Object loader : loaders) {
             Map<String, Class<?>> lClasses = (Map<String, Class<?>>) lF.get(loader);
+            PluginDescriptionFile desc = (PluginDescriptionFile) dF.get(loader);
 
-            for (Class c : lClasses.values()) {
-                if (!c.getName().startsWith("me.libraryaddict.disguise.disguisetypes.watchers.") &&
-                        !c.getName().equals("me.libraryaddict.disguise.disguisetypes.FlagWatcher")) {
-                    continue;
-                }
-
-                PluginDescriptionFile desc = (PluginDescriptionFile) dF.get(loader);
-
+            if (hasWatcher(lClasses)) {
                 LibsDisguises.getInstance().getLogger().severe(desc.getFullName() +
                         " has been a naughty plugin, they're declaring access to the disguise watchers before Lib's " +
                         "Disguises can properly load them! They should add 'LibsDisguises' to the 'depend' section of" +
@@ -54,6 +44,29 @@ public class WatcherSanitizer {
                 break;
             }
         }
+
+        Field cM = JavaPluginLoader.class.getDeclaredField("classes");
+        cM.setAccessible(true);
+        Map<String, Class<?>> classes = (Map<String, Class<?>>) cM.get(javaLoader);
+
+        if (hasWatcher(classes)) {
+            LibsDisguises.getInstance().getLogger()
+                    .severe("Somehow the main server has a Watcher instance! Hopefully there was a plugin mentioned " +
+                            "above! This is a bug!");
+        }
+    }
+
+    private static boolean hasWatcher(Map<String, Class<?>> classes) {
+        for (Class c : classes.values()) {
+            if (!c.getName().startsWith("me.libraryaddict.disguise.disguisetypes.watchers.") &&
+                    !c.getName().equals("me.libraryaddict.disguise.disguisetypes.FlagWatcher")) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public static void init() {
@@ -64,19 +77,21 @@ public class WatcherSanitizer {
             e.printStackTrace();
         }
 
-        IAsm asm;
-
-        if (NmsVersion.v1_14.isSupported()) {
-            asm = new Asm14();
-        } else {
-            if (!NmsVersion.v1_13.isSupported()) {
-                new AsmDownloader();
-            }
-
-            asm = new Asm13();
-        }
+        ArrayList<String> mapped = new ArrayList<>();
 
         try (InputStream stream = LibsDisguises.getInstance().getResource("ANTI_PIRACY_ENCRYPTION")) {
+            IAsm asm;
+
+            if (NmsVersion.v1_14.isSupported()) {
+                asm = new Asm14();
+            } else {
+                if (!NmsVersion.v1_13.isSupported()) {
+                    new AsmDownloader();
+                }
+
+                asm = new Asm13();
+            }
+
             List<String> lines = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).lines()
                     .collect(Collectors.toList());
 
@@ -101,10 +116,12 @@ public class WatcherSanitizer {
 
             for (Map.Entry<String, ArrayList<Map.Entry<String, String>>> entry : toRemove.entrySet()) {
                 Class result = asm.createClassWithoutMethods(entry.getKey(), entry.getValue());
+                mapped.add(entry.getKey());
             }
         }
-        catch (IOException | NoClassDefFoundError | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
+        catch (IOException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException | LinkageError e) {
             e.printStackTrace();
+            LibsDisguises.getInstance().getLogger().severe("Registered: " + new Gson().toJson(mapped));
         }
     }
 }

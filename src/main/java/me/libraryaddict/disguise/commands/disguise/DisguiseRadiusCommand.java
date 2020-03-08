@@ -1,14 +1,14 @@
-package me.libraryaddict.disguise.commands;
+package me.libraryaddict.disguise.commands.disguise;
 
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.DisguiseConfig;
+import me.libraryaddict.disguise.commands.DisguiseBaseCommand;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.LivingWatcher;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParseException;
 import me.libraryaddict.disguise.utilities.parser.DisguiseParser;
 import me.libraryaddict.disguise.utilities.parser.DisguisePermissions;
-import me.libraryaddict.disguise.utilities.reflection.ClassGetter;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import me.libraryaddict.disguise.utilities.translations.TranslateType;
 import org.apache.commons.lang.StringUtils;
@@ -33,9 +33,14 @@ public class DisguiseRadiusCommand extends DisguiseBaseCommand implements TabCom
 
     public DisguiseRadiusCommand(int maxRadius) {
         this.maxRadius = maxRadius;
-        for (Class c : ClassGetter.getClassesForPackage("org.bukkit.entity")) {
-            if (c != Entity.class && Entity.class.isAssignableFrom(c) && c.getAnnotation(Deprecated.class) == null) {
+
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+
+            while (c != null && Entity.class.isAssignableFrom(c) && !validClasses.contains(c)) {
                 validClasses.add(c);
+
+                c = c.getSuperclass();
             }
         }
     }

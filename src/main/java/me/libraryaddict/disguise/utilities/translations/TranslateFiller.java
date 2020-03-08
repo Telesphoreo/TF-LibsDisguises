@@ -3,11 +3,12 @@ package me.libraryaddict.disguise.utilities.translations;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.utilities.params.ParamInfo;
 import me.libraryaddict.disguise.utilities.params.ParamInfoManager;
-import me.libraryaddict.disguise.utilities.reflection.ClassGetter;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Created by libraryaddict on 10/06/2017.
@@ -80,7 +81,19 @@ public class TranslateFiller {
         TranslateType.DISGUISE_OPTIONS.save("baby", "Used as a shortcut for setBaby when disguising an entity");
         TranslateType.DISGUISE_OPTIONS.save("adult", "Used as a shortcut for setBaby(false) when disguising an entity");
 
-        for (Class c : ClassGetter.getClassesForPackage("org.bukkit.entity")) {
+        ArrayList<Class> validClasses = new ArrayList<>();
+
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+
+            while (c != null && Entity.class.isAssignableFrom(c) && !validClasses.contains(c)) {
+                validClasses.add(c);
+
+                c = c.getSuperclass();
+            }
+        }
+
+        for (Class c : validClasses) {
             if (c != Entity.class && Entity.class.isAssignableFrom(c) && c.getAnnotation(Deprecated.class) == null) {
                 TranslateType.DISGUISES.save(c.getSimpleName(),
                         "Name for the " + c.getSimpleName() + " EntityType, " + "this is used in radius commands");
