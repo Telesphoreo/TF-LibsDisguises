@@ -18,11 +18,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -209,6 +212,27 @@ public class DisguiseConfig {
     @Getter
     @Setter
     private static boolean notifyPlayerDisguised;
+    private static PermissionDefault commandVisibility = PermissionDefault.TRUE;
+
+    public static PermissionDefault getCommandVisibility() {
+        return commandVisibility;
+    }
+
+    public static void setCommandVisibility(PermissionDefault permissionDefault) {
+        if (permissionDefault == null || getCommandVisibility() == permissionDefault) {
+            return;
+        }
+
+        commandVisibility = permissionDefault;
+
+        for (Permission perm : LibsDisguises.getInstance().getDescription().getPermissions()) {
+            if (!perm.getName().startsWith("libsdisguises.seecmd")) {
+                continue;
+            }
+
+            perm.setDefault(getCommandVisibility());
+        }
+    }
 
     private DisguiseConfig() {
     }
@@ -410,6 +434,15 @@ public class DisguiseConfig {
                     "' to a valid option for SelfDisguisesScoreboard");
         }
 
+        PermissionDefault commandVisibility = PermissionDefault.getByName(config.getString("Permissions.SeeCommands"));
+
+        if (commandVisibility == null) {
+            DisguiseUtilities.getLogger().warning("Invalid option '" + config.getString("Permissions.SeeCommands") +
+                    "' for Permissions.SeeCommands when loading config!");
+        } else {
+            setCommandVisibility(commandVisibility);
+        }
+
         loadCustomDisguises();
 
         // Another wee trap for the non-legit
@@ -429,20 +462,83 @@ public class DisguiseConfig {
             }
         }
 
-        int missingConfigs = 0;
+        boolean verbose = config.getBoolean("VerboseConfig");
+        boolean changed = config.getBoolean("ChangedConfig");
 
-        for (String key : config.getDefaultSection().getKeys(true)) {
-            if (config.contains(key, true)) {
+        if (!verbose) {
+            int missingConfigs = 0;
+
+            for (String key : config.getDefaultSection().getKeys(true)) {
+                if (config.contains(key, true)) {
+                    continue;
+                }
+
+                missingConfigs++;
+            }
+
+            if (missingConfigs > 0) {
+                DisguiseUtilities.getLogger().warning("Your config is missing " + missingConfigs +
+                        " options! Please consider regenerating your config!");
+            }
+        }
+
+        if (verbose || changed) {
+            ArrayList<String> returns = doOutput(config, changed, verbose);
+
+            if (!returns.isEmpty()) {
+                DisguiseUtilities.getLogger()
+                        .info("This is not an error! Now outputting " + (verbose ? "missing " : "") +
+                                (changed ? (verbose ? "and " : "") + "changed/invalid " : "") + "config values");
+
+                for (String v : returns) {
+                    DisguiseUtilities.getLogger().info(v);
+                }
+            }
+        }
+    }
+
+    public static ArrayList<String> doOutput(ConfigurationSection config, boolean informChangedUnknown,
+            boolean informMissing) {
+        HashMap<String, Object> configs = new HashMap<>();
+        ConfigurationSection defaultSection = config.getDefaultSection();
+        ArrayList<String> returns = new ArrayList<>();
+
+        for (String key : defaultSection.getKeys(true)) {
+            if (defaultSection.isConfigurationSection(key)) {
                 continue;
             }
 
-            missingConfigs++;
+            configs.put(key, defaultSection.get(key));
         }
 
-        if (missingConfigs > 0) {
-            DisguiseUtilities.getLogger().warning(
-                    "Your config is missing " + missingConfigs + " options! Please consider regenerating your config!");
+        for (String key : config.getKeys(true)) {
+            if (config.isConfigurationSection(key)) {
+                continue;
+            }
+
+            if (!configs.containsKey(key)) {
+                if (informChangedUnknown) {
+                    returns.add("Unknown config option '" + key + ": " + config.get(key) + "'");
+                }
+                continue;
+            }
+
+            if (!configs.get(key).equals(config.get(key))) {
+                if (informChangedUnknown) {
+                    returns.add("Modified config: '" + key + ": " + config.get(key) + "'");
+                }
+            }
+
+            configs.remove(key);
         }
+
+        if (informMissing) {
+            for (Entry<String, Object> entry : configs.entrySet()) {
+                returns.add("Missing '" + entry.getKey() + ": " + entry.getValue() + "'");
+            }
+        }
+
+        return returns;
     }
 
     static void loadCustomDisguises() {
