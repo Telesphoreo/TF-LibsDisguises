@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class PacketsManager {
     private static PacketListener clientInteractEntityListener;
@@ -66,22 +67,6 @@ public class PacketsManager {
         return inventoryModifierEnabled;
     }
 
-    public static boolean isViewDisguisesListenerEnabled() {
-        return viewDisguisesListenerEnabled;
-    }
-
-    public static void setHearDisguisesListener(boolean enabled) {
-        if (soundsListenerEnabled != enabled) {
-            soundsListenerEnabled = enabled;
-
-            if (soundsListenerEnabled) {
-                ProtocolLibrary.getProtocolManager().addPacketListener(soundsListener);
-            } else {
-                ProtocolLibrary.getProtocolManager().removePacketListener(soundsListener);
-            }
-        }
-    }
-
     public static void setInventoryListenerEnabled(boolean enabled) {
         if (inventoryModifierEnabled != enabled) {
             inventoryModifierEnabled = enabled;
@@ -101,6 +86,22 @@ public class PacketsManager {
                         player.updateInventory();
                     }
                 }
+            }
+        }
+    }
+
+    public static boolean isViewDisguisesListenerEnabled() {
+        return viewDisguisesListenerEnabled;
+    }
+
+    public static void setHearDisguisesListener(boolean enabled) {
+        if (soundsListenerEnabled != enabled) {
+            soundsListenerEnabled = enabled;
+
+            if (soundsListenerEnabled) {
+                ProtocolLibrary.getProtocolManager().addPacketListener(soundsListener);
+            } else {
+                ProtocolLibrary.getProtocolManager().removePacketListener(soundsListener);
             }
         }
     }

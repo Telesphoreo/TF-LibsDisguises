@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities.params.types.custom;
 
+import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.params.types.ParamInfoEnum;
@@ -64,6 +65,11 @@ public class ParamInfoItemStack extends ParamInfoEnum {
             return name;
         }
 
+        // If its not a CraftItemStack
+        if (!MinecraftReflection.isCraftItemStack(item) && item.hasItemMeta()) {
+            item = ReflectionManager.getCraftItem(item);
+        }
+
         String itemName = ReflectionManager.getItemName(item.getType());
         ArrayList<String> mcArray = new ArrayList<>();
 
@@ -106,10 +112,10 @@ public class ParamInfoItemStack extends ParamInfoEnum {
                 split = string.substring(0, string.indexOf("{") - 1).split("[ -]");
                 split = Arrays.copyOf(split, split.length + 1);
                 split[split.length - 1] = string.substring(string.indexOf("{"));
-            } else if (string.matches("[^{ ]+?\\{.+?}( [0-9]+?)")) { // /give @p stone[data] <amount?>
+            } else if (string.matches("[^{ ]+?\\{.+?}( [0-9]+)?")) { // /give @p stone[data] <amount?>
                 split = new String[string.endsWith("}") ? 2 : 3];
                 split[0] = string.substring(0, string.indexOf("{"));
-                split[string.endsWith("}") ? 2 : 1] = string
+                split[string.endsWith("}") ? 1 : 2] = string
                         .substring(string.indexOf("{"), string.lastIndexOf("}") + 1);
 
                 if (!string.endsWith("}")) {
