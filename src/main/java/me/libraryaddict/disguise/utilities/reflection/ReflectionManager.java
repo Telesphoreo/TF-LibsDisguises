@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -127,9 +126,7 @@ public class ReflectionManager {
         if (obj.isAnnotationPresent(NmsRemovedIn.class)) {
             NmsRemovedIn removed = obj.getAnnotation(NmsRemovedIn.class);
 
-            if (removed.val().isSupported()) {
-                return false;
-            }
+            return !removed.val().isSupported();
         }
 
         return true;
@@ -717,7 +714,7 @@ public class ReflectionManager {
 
     public static double getPing(Player player) {
         try {
-            return (double) pingField.getInt(ReflectionManager.getNmsEntity(player));
+            return pingField.getInt(ReflectionManager.getNmsEntity(player));
         }
         catch (Exception ex) {
             ex.printStackTrace();

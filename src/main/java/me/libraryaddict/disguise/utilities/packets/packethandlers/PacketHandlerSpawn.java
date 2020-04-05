@@ -155,11 +155,11 @@ public class PacketHandlerSpawn implements IPacketHandler {
             mods.write(5, pitch);
         } else if (disguise.getType().isPlayer()) {
             PlayerDisguise playerDisguise = (PlayerDisguise) disguise;
+            boolean visibleOrNewCompat = playerDisguise.isNameVisible() || DisguiseConfig.isScoreboardDisguiseNames();
 
-            WrappedGameProfile spawnProfile = playerDisguise.isNameVisible() ? playerDisguise.getGameProfile() :
-                    ReflectionManager.getGameProfileWithThisSkin(UUID.randomUUID(),
-                            playerDisguise.isNameVisible() ? playerDisguise.getProfileName() : "",
-                            playerDisguise.getGameProfile());
+            WrappedGameProfile spawnProfile = visibleOrNewCompat ? playerDisguise.getGameProfile() : ReflectionManager
+                    .getGameProfileWithThisSkin(UUID.randomUUID(),
+                            visibleOrNewCompat ? playerDisguise.getProfileName() : "", playerDisguise.getGameProfile());
 
             int entityId = disguisedEntity.getEntityId();
 
@@ -378,6 +378,13 @@ public class PacketHandlerSpawn implements IPacketHandler {
                 ints.write(1, 0);
                 ints.write(2, 0);
                 ints.write(3, 0);
+
+                if (disguise.getType() == DisguiseType.DROPPED_ITEM) {
+                    PacketContainer velocity = new PacketContainer(PacketType.Play.Server.ENTITY_VELOCITY);
+                    velocity.getIntegers().write(0, disguisedEntity.getEntityId());
+
+                    packets.addPacket(velocity);
+                }
             }
 
             spawnEntity.getModifier().write(8, pitch);

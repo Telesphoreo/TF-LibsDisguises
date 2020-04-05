@@ -221,6 +221,9 @@ public class DisguiseConfig {
     @Setter
     private static BarColor bossBarColor = BarColor.GREEN;
     private static PermissionDefault commandVisibility = PermissionDefault.TRUE;
+    @Getter
+    @Setter
+    private static boolean scoreboardDisguiseNames;
 
     public static PermissionDefault getCommandVisibility() {
         return commandVisibility;
@@ -394,7 +397,8 @@ public class DisguiseConfig {
         setEntityStatusPacketsEnabled(config.getBoolean("PacketsEnabled.EntityStatus"));
         setEquipmentPacketsEnabled(config.getBoolean("PacketsEnabled.Equipment"));
         setExplicitDisguisePermissions(config.getBoolean("Permissions.ExplicitDisguises"));
-        setExtendedDisguiseNames(config.getBoolean("ExtendedNames"));
+        // The default value shall be false if you don't update config
+        setExtendedDisguiseNames(config.contains("ScoreboardNames") && config.getBoolean("ExtendedNames"));
         setHideArmorFromSelf(config.getBoolean("RemoveArmor"));
         setHideDisguisedPlayers(config.getBoolean("HideDisguisedPlayersFromTab"));
         setHideHeldItemFromSelf(config.getBoolean("RemoveHeldItem"));
@@ -432,6 +436,7 @@ public class DisguiseConfig {
         setWarnScoreboardConflict(config.getBoolean("Scoreboard.WarnConflict"));
         setWitherSkullPacketsEnabled(config.getBoolean("PacketsEnabled.WitherSkull"));
         setWolfDyeable(config.getBoolean("DyeableWolf"));
+        setScoreboardDisguiseNames(config.getBoolean("ScoreboardNames"));
 
         if (!LibsPremium.isPremium() && (isSavePlayerDisguises() || isSaveEntityDisguises())) {
             DisguiseUtilities.getLogger().warning("You must purchase the plugin to use saved disguises!");
