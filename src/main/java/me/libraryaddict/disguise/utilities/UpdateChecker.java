@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class UpdateChecker {
@@ -20,6 +21,7 @@ public class UpdateChecker {
     private String latestVersion;
     @Getter
     private int latestSnapshot;
+    private final long started = System.currentTimeMillis();
 
     public UpdateChecker(String resourceID) {
         this.resourceID = resourceID;
@@ -93,8 +95,25 @@ public class UpdateChecker {
     }
 
     private boolean isNewerVersion(String currentVersion, String newVersion) {
+        currentVersion = currentVersion.replaceAll("(v)|(-SNAPSHOT)", "");
+        newVersion = newVersion.replaceAll("(v)|(-SNAPSHOT)", "");
+
+        // If the server has been online for less than 6 hours and both versions are 1.1.1 kind of versions
+        if (started + TimeUnit.HOURS.toMillis(6) > System.currentTimeMillis() &&
+                currentVersion.matches("[0-9]+(\\.[0-9]+)*") && newVersion.matches("[0-9]+(\\.[0-9]+)*")) {
+
+            int cVersion = Integer.parseInt(currentVersion.replace(".", ""));
+            int nVersion = Integer.parseInt(newVersion.replace(".", ""));
+
+            // If the current version is a higher version, and is only a higher version by 3 minor numbers
+            // Then we have a cache problem
+            if (cVersion > nVersion && nVersion + 3 > cVersion) {
+                return false;
+            }
+        }
+
         // Lets just ignore all this fancy logic, and say that if you're not on the current release, you're outdated!
-        return !currentVersion.replaceAll("(v)|(-SNAPSHOT)", "").equals(newVersion.replaceAll("(v)|(-SNAPSHOT)", ""));
+        return !currentVersion.equals(newVersion);
 
         /*
         // Remove 'v' and '-SNAPSHOT' from string, split by decimal points

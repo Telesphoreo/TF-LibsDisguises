@@ -20,6 +20,7 @@ import me.libraryaddict.disguise.events.DisguiseEvent;
 import me.libraryaddict.disguise.events.UndisguiseEvent;
 import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 import me.libraryaddict.disguise.utilities.LibsPremium;
+import me.libraryaddict.disguise.utilities.reflection.NmsVersion;
 import me.libraryaddict.disguise.utilities.reflection.ReflectionManager;
 import me.libraryaddict.disguise.utilities.translations.LibsMsg;
 import net.md_5.bungee.api.ChatMessageType;
@@ -79,9 +80,26 @@ public abstract class Disguise {
      * If set, how long before disguise expires
      */
     private long disguiseExpires;
+    /**
+     * For when plugins may want to assign custom data to a disguise, such as who owns it
+     */
+    @Getter
+    private final HashMap<String, Object> customData = new HashMap<>();
 
     public Disguise(DisguiseType disguiseType) {
         this.disguiseType = disguiseType;
+    }
+
+    public void addCustomData(String key, Object data) {
+        customData.put(key, data);
+    }
+
+    public boolean hasCustomData(String key) {
+        return customData.containsKey(key);
+    }
+
+    public Object getCustomData(String key) {
+        return customData.get(key);
     }
 
     @Override
@@ -186,7 +204,8 @@ public abstract class Disguise {
     }
 
     private void makeBossBar() {
-        if (getNotifyBar() != DisguiseConfig.NotifyBar.BOSS_BAR || !(getEntity() instanceof Player)) {
+        if (getNotifyBar() != DisguiseConfig.NotifyBar.BOSS_BAR || !NmsVersion.v1_13.isSupported() ||
+                !(getEntity() instanceof Player)) {
             return;
         }
 
@@ -803,11 +822,13 @@ public abstract class Disguise {
         getEntity().setMetadata("LastDisguise",
                 new FixedMetadataValue(LibsDisguises.getInstance(), System.currentTimeMillis()));
 
-        BossBar bar = Bukkit.getBossBar(getBossBar());
+        if (NmsVersion.v1_13.isSupported()) {
+            BossBar bar = Bukkit.getBossBar(getBossBar());
 
-        if (bar != null) {
-            bar.removeAll();
-            Bukkit.removeBossBar(getBossBar());
+            if (bar != null) {
+                bar.removeAll();
+                Bukkit.removeBossBar(getBossBar());
+            }
         }
 
         return true;
@@ -942,11 +963,7 @@ public abstract class Disguise {
             PlayerDisguise disguise = (PlayerDisguise) this;
 
             if (disguise.isDisplayedInTab()) {
-                PacketContainer addTab = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
-                addTab.getPlayerInfoAction().write(0, PlayerInfoAction.ADD_PLAYER);
-                addTab.getPlayerInfoDataLists().write(0, Collections.singletonList(
-                        new PlayerInfoData(disguise.getGameProfile(), 0, NativeGameMode.SURVIVAL,
-                                WrappedChatComponent.fromText(disguise.getProfileName()))));
+                PacketContainer addTab = DisguiseUtilities.getTabPacket(disguise, PlayerInfoAction.ADD_PLAYER);
 
                 try {
                     for (Player player : Bukkit.getOnlinePlayers()) {

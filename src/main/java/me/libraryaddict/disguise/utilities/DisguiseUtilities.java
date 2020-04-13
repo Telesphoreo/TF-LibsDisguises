@@ -1,5 +1,6 @@
 package me.libraryaddict.disguise.utilities;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -35,7 +36,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.bukkit.*;
-import org.bukkit.boss.BossBar;
 import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -967,17 +967,19 @@ public class DisguiseUtilities {
             registerNoName(board);
         }
 
-        Iterator<KeyedBossBar> bars = Bukkit.getBossBars();
-        ArrayList<KeyedBossBar> barList = new ArrayList<>();
-        bars.forEachRemaining(barList::add);
+        if (NmsVersion.v1_13.isSupported()) {
+            Iterator<KeyedBossBar> bars = Bukkit.getBossBars();
+            ArrayList<KeyedBossBar> barList = new ArrayList<>();
+            bars.forEachRemaining(barList::add);
 
-        for (KeyedBossBar bar : barList) {
-            if (!bar.getKey().getNamespace().equalsIgnoreCase("libsdisguises")) {
-                continue;
+            for (KeyedBossBar bar : barList) {
+                if (!bar.getKey().getNamespace().equalsIgnoreCase("libsdisguises")) {
+                    continue;
+                }
+
+                bar.removeAll();
+                Bukkit.removeBossBar(bar.getKey());
             }
-
-            bar.removeAll();
-            Bukkit.removeBossBar(bar.getKey());
         }
     }
 
@@ -1941,8 +1943,6 @@ public class DisguiseUtilities {
             if (transformed.isUnhandled())
                 transformed.addPacket(packet);
 
-            transformed.setSpawnPacketCheck(packet.getType());
-
             for (PacketContainer p : transformed.getPackets()) {
                 p = p.deepClone();
                 p.getIntegers().write(0, DisguiseAPI.getSelfDisguiseId());
@@ -1954,6 +1954,17 @@ public class DisguiseUtilities {
         catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    public static PacketContainer getTabPacket(PlayerDisguise disguise, EnumWrappers.PlayerInfoAction action) {
+        PacketContainer addTab = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+
+        addTab.getPlayerInfoAction().write(0, action);
+        addTab.getPlayerInfoDataLists().write(0, Collections.singletonList(
+                new PlayerInfoData(disguise.getGameProfile(), 0, EnumWrappers.NativeGameMode.SURVIVAL,
+                        WrappedChatComponent.fromText(disguise.getName()))));
+
+        return addTab;
     }
 
     /**
